@@ -19,6 +19,8 @@ namespace ROILootManager {
         private bool summaryRosterChanging = false;
         private frmLootLog lootLogForm = new frmLootLog();
         private Thread logRefresher;
+        private String selectedTier;
+        private bool includeRots = false;
 
         public frmMain() {
             InitializeComponent();
@@ -73,7 +75,34 @@ namespace ROILootManager {
             updateEqLogControls();
 
             loadRosterNames();
-            //btnLootSummaryAll_Click(null, null);
+
+            String savedTier = PropertyManager.getManager().getProperty(PropertyManager.LAST_TIER_SELECTED);
+            DbDataReader rs = DBManager.getManager().executeQuery("SELECT DISTINCT tier FROM events ORDER BY tier");
+            List<String> tiers = new List<String>();
+            tiers.Add("All");
+
+            while (rs.Read()) {
+                tiers.Add(rs[0].ToString());
+            }
+            cmbTierSelection.DataSource = tiers;
+
+            if (savedTier != null && !"".Equals(savedTier) && tiers.Contains(savedTier)) {
+                cmbTierSelection.SelectedItem = savedTier;
+                selectedTier = savedTier;
+            } else {
+                cmbTierSelection.SelectedItem = "All";
+                selectedTier = "All";
+                PropertyManager.getManager().setProperty(PropertyManager.LAST_TIER_SELECTED, "All");
+            }
+
+            //string savedIncludeRots = PropertyManager.getManager().getProperty(PropertyManager.INCLUDE_ROTS);
+            //if (savedIncludeRots != null && !"".Equals(savedIncludeRots) && "true".Equals(savedIncludeRots, StringComparison.InvariantCultureIgnoreCase)) {
+                //includeRots = true;
+            //} else {
+                includeRots = false;
+            //}
+
+            chkIncludeRots.Checked = includeRots;
 
             dgvLootSummary.SortCompare += new DataGridViewSortCompareEventHandler(lootSummarySorter);
             dgvVisibleSummary.SortCompare += new DataGridViewSortCompareEventHandler(lootSummarySorter);
@@ -127,6 +156,7 @@ namespace ROILootManager {
                 case "clmLootSummaryNonVisibles":
                 case "clmLootSummaryWeapons":
                 case "clmLootSummaryRots":
+                case "clmLootSummaryAlt":
                 case "clmLootSummarySpecial":
                 case "clmVisibleSummaryTotal":
                 case "clmVisibleSummaryWrist":
@@ -199,6 +229,22 @@ namespace ROILootManager {
             summaryRosterChanging = false;
         }
 
+        private String getTierFilter() {
+            if (selectedTier == null || "".Equals(selectedTier) || "All".Equals(selectedTier)) {
+                return " ";
+            } else {
+                return " AND EXISTS(SELECT 1 FROM events WHERE short_event_name = l.short_event_name AND tier = '" + DBManager.safeParam(selectedTier) + "') ";
+            }
+        }
+
+        private String getIncludeRotsFilter() {
+            if (includeRots) {
+                return " AND l.alt_loot <> 'Yes'";
+            } else {
+                return " AND l.rot <> 'Yes' ";
+            }
+        }
+
         private void getLootSummary() {
             dgvLootSummary.Rows.Clear();
             dgvVisibleSummary.Rows.Clear();
@@ -213,29 +259,30 @@ namespace ROILootManager {
                     selectedNames.Append(String.Format("'{0}', ", DBManager.safeParam(o.Text)));
                 }
 
-
-
+                string namesFilter = selectedNames.ToString().Trim().Trim(',');
+                string queryFilters = getIncludeRotsFilter() + getTierFilter();
 
                 StringBuilder sql = new StringBuilder();
                 sql.AppendLine("SELECT r.name,");
                 sql.AppendLine("       (SELECT thirty || ' / ' || sixty || ' / ' || ninety FROM attendance WHERE name = r.name) AS attendance,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes') AS loot_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('Arms', 'Chest', 'Feet', 'Hands', 'Head', 'Legs', 'Wrist')) AS visible_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('Back', 'Charm', 'Ear', 'Face', 'Neck', 'Range', 'Ring', 'Shield', 'Shoulders', 'Waist')) AS non_visible_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('1HB', '1HP', '1HS', '2HB', '2HP', '2HS', 'HTH')) AS weapon_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot = 'Yes') AS rot_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND rot <> 'Yes' AND l.short_event_name = 'NTOV: Vulak''Aerr' AND NOT EXISTS(SELECT 1 FROM items AS i WHERE i.item = l.item AND is_global = 'Yes')) AS vulak_toal,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l, items AS i WHERE name = r.name AND l.rot <> 'Yes' AND UPPER(l.item) = UPPER(i.item) AND i.is_special = 'Yes') AS special_total,");
-                sql.AppendLine("       strftime('%m/%d/%Y', (SELECT MAX(loot_date) FROM loot WHERE name = r.name AND rot <> 'Yes')) AS last_loot_date");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name" +  queryFilters + ") AS loot_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('Arms', 'Chest', 'Feet', 'Hands', 'Head', 'Legs', 'Wrist')" + queryFilters + ") AS visible_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('Back', 'Charm', 'Ear', 'Face', 'Neck', 'Range', 'Ring', 'Shield', 'Shoulders', 'Waist')" + queryFilters + ") AS non_visible_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('1HB', '1HP', '1HS', '2HB', '2HP', '2HS', 'HTH')" + queryFilters + ") AS weapon_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND rot = 'Yes'" + getTierFilter() + ") AS rot_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name " + getIncludeRotsFilter() + " AND l.short_event_name = 'NTOV: Vulak''Aerr' AND NOT EXISTS(SELECT 1 FROM items AS i WHERE i.item = l.item AND is_global = 'Yes')) AS vulak_toal,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l, items AS i WHERE name = r.name " + getIncludeRotsFilter() + " AND UPPER(l.item) = UPPER(i.item) AND i.is_special = 'Yes') AS special_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND alt_loot = 'Yes') AS alt_total,");
+                sql.AppendLine("       strftime('%m/%d/%Y', (SELECT MAX(loot_date) FROM loot AS l WHERE name = r.name" + queryFilters + ")) AS last_loot_date");
                 sql.AppendLine("FROM   roster AS r");
                 sql.AppendLine("WHERE  r.active = 'Yes'");
-                sql.AppendLine("AND    r.name IN (" + selectedNames.ToString().Trim().Trim(',') + ")");
+                sql.AppendLine("AND    r.name IN (" + namesFilter + ")");
                 sql.AppendLine("ORDER BY r.name");
 
                 DbDataReader rs = DBManager.getManager().executeQuery(sql.ToString());
 
                 while (rs.Read()) {
-                    dgvLootSummary.Rows.Add(new string[] { rs[0].ToString(), rs[1].ToString(), rs[2].ToString(), rs[3].ToString(), rs[4].ToString(), rs[5].ToString(), rs[6].ToString(), rs[7].ToString(), rs[8].ToString(), rs[9].ToString() });
+                    dgvLootSummary.Rows.Add(new string[] { rs[0].ToString(), rs[1].ToString(), rs[2].ToString(), rs[3].ToString(), rs[4].ToString(), rs[5].ToString(), rs[6].ToString(), rs[7].ToString(), rs[8].ToString(), rs[9].ToString(), rs[10].ToString() });
                 }
 
                 rs.Close();
@@ -243,18 +290,18 @@ namespace ROILootManager {
 
                 sql = new StringBuilder();
                 sql.AppendLine("SELECT r.name,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('Arms')) AS arms_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('Chest')) AS chest_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('Feet')) AS feet_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('Hands')) AS hands_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('Head')) AS head_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('Legs')) AS legs_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('Wrist')) AS wrist_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('Arms', 'Chest', 'Feet', 'Hands', 'Head', 'Legs', 'Wrist')) AS visible_total,");
-                sql.AppendLine("       strftime('%m/%d/%Y', (SELECT MAX(loot_date) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('Arms', 'Chest', 'Feet', 'Hands', 'Head', 'Legs', 'Wrist'))) AS last_visible_loot_date");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('Arms')" + queryFilters + ") AS arms_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('Chest')" + queryFilters + ") AS chest_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('Feet')" + queryFilters + ") AS feet_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('Hands')" + queryFilters + ") AS hands_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('Head')" + queryFilters + ") AS head_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('Legs')" + queryFilters + ") AS legs_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('Wrist')" + queryFilters + ") AS wrist_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('Arms', 'Chest', 'Feet', 'Hands', 'Head', 'Legs', 'Wrist')" + queryFilters + ") AS visible_total,");
+                sql.AppendLine("       strftime('%m/%d/%Y', (SELECT MAX(loot_date) FROM loot AS l WHERE name = r.name AND slot IN ('Arms', 'Chest', 'Feet', 'Hands', 'Head', 'Legs', 'Wrist')" + queryFilters + ")) AS last_visible_loot_date");
                 sql.AppendLine("FROM   roster AS r");
                 sql.AppendLine("WHERE  r.active = 'Yes'");
-                sql.AppendLine("AND    r.name IN (" + selectedNames.ToString().Trim().Trim(',') + ")");
+                sql.AppendLine("AND    r.name IN (" + namesFilter + ")");
                 sql.AppendLine("ORDER BY r.name");
 
                 rs = DBManager.getManager().executeQuery(sql.ToString());
@@ -268,21 +315,21 @@ namespace ROILootManager {
 
                 sql = new StringBuilder();
                 sql.AppendLine("SELECT r.name,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('Back')) AS back_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('Charm')) AS charm_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('Ear')) AS ear_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('Face')) AS face_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('Neck')) AS neck_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('Range')) AS range_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('Ring')) AS ring_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('Shield')) AS shield_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('Shoulders')) AS shoulders_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('Waist')) AS waist_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('Back', 'Charm', 'Ear', 'Face', 'Neck', 'Range', 'Ring', 'Shield', 'Shoulders', 'Waist')) AS non_visible_total,");
-                sql.AppendLine("       strftime('%m/%d/%Y', (SELECT MAX(loot_date) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('Back', 'Charm', 'Ear', 'Face', 'Neck', 'Range', 'Ring', 'Shield', 'Shoulders', 'Waist'))) AS last_non_vis_loot_date");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('Back')" + queryFilters + ") AS back_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('Charm')" + queryFilters + ") AS charm_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('Ear')" + queryFilters + ") AS ear_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('Face')" + queryFilters + ") AS face_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('Neck')" + queryFilters + ") AS neck_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('Range')" + queryFilters + ") AS range_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('Ring')" + queryFilters + ") AS ring_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('Shield')" + queryFilters + ") AS shield_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('Shoulders')" + queryFilters + ") AS shoulders_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('Waist')" + queryFilters + ") AS waist_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('Back', 'Charm', 'Ear', 'Face', 'Neck', 'Range', 'Ring', 'Shield', 'Shoulders', 'Waist')" + queryFilters + ") AS non_visible_total,");
+                sql.AppendLine("       strftime('%m/%d/%Y', (SELECT MAX(loot_date) FROM loot AS l WHERE name = r.name AND slot IN ('Back', 'Charm', 'Ear', 'Face', 'Neck', 'Range', 'Ring', 'Shield', 'Shoulders', 'Waist')" + queryFilters + ")) AS last_non_vis_loot_date");
                 sql.AppendLine("FROM   roster AS r");
                 sql.AppendLine("WHERE  r.active = 'Yes'");
-                sql.AppendLine("AND    r.name IN (" + selectedNames.ToString().Trim().Trim(',') + ")");
+                sql.AppendLine("AND    r.name IN (" + namesFilter + ")");
                 sql.AppendLine("ORDER BY r.name");
 
                 rs = DBManager.getManager().executeQuery(sql.ToString());
@@ -297,18 +344,18 @@ namespace ROILootManager {
 
                 sql = new StringBuilder();
                 sql.AppendLine("SELECT r.name,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('1HB')) AS blunt_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('1HP')) AS piercing_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('1HS')) AS slash_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('2HB')) AS two_hand_blunt_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('2HP')) AS two_hand_pierce_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('2HS')) AS two_hand_slash_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('HTH')) AS hth_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('1HB', '1HP', '1HS', '2HB', '2HP', '2HS', 'HTH')) AS weapon_total,");
-                sql.AppendLine("       strftime('%m/%d/%Y', (SELECT MAX(loot_date) FROM loot WHERE name = r.name AND rot <> 'Yes' AND slot IN ('1HB', '1HP', '1HS', '2HB', '2HP', '2HS', 'HTH'))) AS last_weapon_loot_date");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('1HB')" + queryFilters + ") AS blunt_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('1HP')" + queryFilters + ") AS piercing_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('1HS')" + queryFilters + ") AS slash_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('2HB')" + queryFilters + ") AS two_hand_blunt_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('2HP')" + queryFilters + ") AS two_hand_pierce_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('2HS')" + queryFilters + ") AS two_hand_slash_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('HTH')" + queryFilters + ") AS hth_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('1HB', '1HP', '1HS', '2HB', '2HP', '2HS', 'HTH')" + queryFilters + ") AS weapon_total,");
+                sql.AppendLine("       strftime('%m/%d/%Y', (SELECT MAX(loot_date) FROM loot AS l WHERE name = r.name AND slot IN ('1HB', '1HP', '1HS', '2HB', '2HP', '2HS', 'HTH')" + queryFilters + ")) AS last_weapon_loot_date");
                 sql.AppendLine("FROM   roster AS r");
                 sql.AppendLine("WHERE  r.active = 'Yes'");
-                sql.AppendLine("AND    r.name IN (" + selectedNames.ToString().Trim().Trim(',') + ")");
+                sql.AppendLine("AND    r.name IN (" + namesFilter + ")");
                 sql.AppendLine("ORDER BY r.name");
 
                 rs = DBManager.getManager().executeQuery(sql.ToString());
@@ -323,19 +370,19 @@ namespace ROILootManager {
                 SortOrder order;
                 try {
                     order = dgvLootSummary.SortOrder;
-                    if (dgvLootSummary.SortedColumn != null && order != null && !order.Equals(SortOrder.None))
+                    if (dgvLootSummary.SortedColumn != null && !order.Equals(SortOrder.None))
                         dgvLootSummary.Sort(dgvLootSummary.SortedColumn, (order.Equals(SortOrder.Ascending) ? ListSortDirection.Ascending : ListSortDirection.Descending));
 
                     order = dgvVisibleSummary.SortOrder;
-                    if (dgvVisibleSummary.SortedColumn != null && order != null && !order.Equals(SortOrder.None))
+                    if (dgvVisibleSummary.SortedColumn != null && !order.Equals(SortOrder.None))
                         dgvVisibleSummary.Sort(dgvVisibleSummary.SortedColumn, (order.Equals(SortOrder.Ascending) ? ListSortDirection.Ascending : ListSortDirection.Descending));
 
                     order = dgvNonVisibleSummary.SortOrder;
-                    if (dgvNonVisibleSummary.SortedColumn != null && order != null && !order.Equals(SortOrder.None))
+                    if (dgvNonVisibleSummary.SortedColumn != null && !order.Equals(SortOrder.None))
                         dgvNonVisibleSummary.Sort(dgvNonVisibleSummary.SortedColumn, (order.Equals(SortOrder.Ascending) ? ListSortDirection.Ascending : ListSortDirection.Descending));
 
                     order = dgvWeaponSummary.SortOrder;
-                    if (dgvWeaponSummary.SortedColumn != null && order != null && !order.Equals(SortOrder.None))
+                    if (dgvWeaponSummary.SortedColumn != null && !order.Equals(SortOrder.None))
                         dgvWeaponSummary.Sort(dgvWeaponSummary.SortedColumn, (order.Equals(SortOrder.Ascending) ? ListSortDirection.Ascending : ListSortDirection.Descending));
                 } catch (Exception e) {
                     logger.Error("Error resorting the data grids ignored.", e);
@@ -672,10 +719,10 @@ namespace ROILootManager {
             if (e.Control && e.KeyCode == Keys.C) {
                 DataGridViewRow row = ((DataGridView)sender).CurrentRow;
                 if (row != null && row.Cells.Count > 0) {
-                    string str = String.Format("{0}: Attendance: {1}, Total: {2}, Vis: {3}, Non-Vis: {4}, Weapon: {5}, Rot: {6}, Vulak: {7}, Sp: {8}, LL: {9}",
+                    string str = String.Format("{0}: Attendance: {1}, Total: {2}, Vis: {3}, Non-Vis: {4}, Weapon: {5}, Rot: {6}, Vulak: {7}, Sp: {8}, Alt: {9} LL: {10}",
                          row.Cells[0].Value.ToString(), row.Cells[1].Value.ToString(), row.Cells[2].Value.ToString(), row.Cells[3].Value.ToString(),
                            row.Cells[4].Value.ToString(), row.Cells[5].Value.ToString(), row.Cells[6].Value.ToString(), row.Cells[7].Value.ToString(),
-                             row.Cells[8].Value.ToString(), row.Cells[9].Value.ToString());
+                             row.Cells[8].Value.ToString(), row.Cells[9].Value.ToString(), row.Cells[10].Value.ToString());
 
                     Clipboard.SetText(str);
                     e.Handled = true;
@@ -697,6 +744,10 @@ namespace ROILootManager {
                     string tmpStr = splitSpace[i].Trim();
 
                     if (!"".Equals(tmpStr)) {
+                        if (tmpStr.Contains("(")) {
+                            tmpStr = tmpStr.Substring(0, tmpStr.IndexOf("("));
+                        }
+
                         foreach (ListViewItem itm in items) {
                             if (itm.Text.StartsWith(tmpStr, StringComparison.InvariantCultureIgnoreCase)) {
                                 itm.Checked = true;
@@ -718,9 +769,8 @@ namespace ROILootManager {
 
         private void dgvVisibleSummary_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e) {
             String columnName = dgvVisibleSummary.Columns[e.ColumnIndex].Name;
-            if (!"Name".Equals(columnName) && !"Total".Equals(columnName) && !columnName.StartsWith("Last") &&
-                !"0".Equals(dgvVisibleSummary.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString())) {
-                e.CellStyle.BackColor = Color.Green;
+            if ("0".Equals(dgvVisibleSummary.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString())) {
+                e.CellStyle.BackColor = Color.Yellow;
             }
         }
 
@@ -748,6 +798,40 @@ namespace ROILootManager {
             } catch (Exception ex) {
                 MessageBox.Show("An error occured updating the spell data. Try updating again.\nError: " + ex);
             }
+        }
+
+        private void cmbTierSelection_SelectedValueChanged(object sender, EventArgs e) {
+            selectedTier = cmbTierSelection.Text;
+            if (selectedTier == null || "".Equals(selectedTier)) {
+                selectedTier = "All";
+            }
+
+            PropertyManager.getManager().setProperty(PropertyManager.LAST_TIER_SELECTED, selectedTier);
+
+            getLootSummary();
+        }
+
+        private void dgvNonVisibleSummary_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e) {
+            String columnName = dgvNonVisibleSummary.Columns[e.ColumnIndex].Name;
+            if ("0".Equals(dgvNonVisibleSummary.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString())) {
+                e.CellStyle.BackColor = Color.Yellow;
+            }
+        }
+
+        private void dgvWeaponSummary_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e) {
+            String columnName = dgvWeaponSummary.Columns[e.ColumnIndex].Name;
+            if ("0".Equals(dgvWeaponSummary.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString())) {
+                e.CellStyle.BackColor = Color.Yellow;
+            }
+        }
+
+        private void chkIncludeRots_CheckedChanged(object sender, EventArgs e) {
+            bool isChecked = chkIncludeRots.Checked;
+
+            //PropertyManager.getManager().setProperty(PropertyManager.INCLUDE_ROTS, isChecked ? "true" : "false");
+            includeRots = isChecked;
+
+            getLootSummary();
         }
     }
 }

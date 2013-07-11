@@ -8,6 +8,10 @@ namespace ROILootManager {
 
         public static string propFileName = "settings.ini";
 
+        public static string LAST_TIER_SELECTED = "lastTierSelected";
+
+        public static string INCLUDE_ROTS = "includeRots";
+
         private Dictionary<string, string> props;
 
         public PropertyManager() {

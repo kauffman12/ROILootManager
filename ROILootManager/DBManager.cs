@@ -117,7 +117,7 @@ namespace ROILootManager {
 
             // Update the current version
             emptyTable("current_version");
-            string sql = String.Format("INSERT INTO current_version (version) VALUES ({0})", Constants.PROGRAM_VERSION);
+            string sql = String.Format("INSERT INTO current_version (version) VALUES ('{0}')", Constants.PROGRAM_VERSION);
             SQLiteCommand command = new SQLiteCommand(sql, conn);
             command.ExecuteNonQuery();
 
@@ -283,7 +283,7 @@ namespace ROILootManager {
             tier = safeParam(tier);
             is_special = safeParam(is_special);
 
-            string sql = String.Format("INSERT INTO items (slot, item, short_event_name, is_global, tier) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}');", slot, item, shortEventName, isGlobal, tier, is_special);
+            string sql = String.Format("INSERT INTO items (slot, item, short_event_name, is_global, tier, is_special) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}');", slot, item, shortEventName, isGlobal, tier, is_special);
             SQLiteCommand command = new SQLiteCommand(sql, conn);
             int result = command.ExecuteNonQuery();
             dbTrans.Commit();
