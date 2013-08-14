@@ -5,6 +5,8 @@ using System.Text.RegularExpressions;
 using Google.GData.Client;
 using Google.GData.Spreadsheets;
 using log4net;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace ROILootManager {
     class Roster {
@@ -91,40 +93,40 @@ namespace ROILootManager {
         }
 
         public void loadAttendance() {
-            DbDataReader rs = DBManager.getManager().executeQuery("SELECT name FROM roster WHERE active = 'Yes'");
-            System.Net.WebClient client = new System.Net.WebClient();
-            Regex rx = new Regex("<span class=\".+\">([0-9]+)% of raids</span>");
-            List<BulkLoader> attend = new List<BulkLoader>();
-            while (rs.Read()) {
-                RosterAttendence r = new RosterAttendence();
-                r.name = rs[0].ToString();
+            using (var webClient = new System.Net.WebClient()) {
+                List<BulkLoader> attend = new List<BulkLoader>();
+                string json = webClient.DownloadString(Constants.RAID_ATTENDANCE_URL);
+                JsonTextReader reader = new JsonTextReader(new StringReader(json));
+                while (reader.Read()) {
+                    if (JsonToken.StartObject.Equals(reader.TokenType)) {
+                        RosterAttendence r = new RosterAttendence();
 
-                string content = client.DownloadString(String.Format("http://roiguild.org/dkp/viewmember.php?name={0}", rs[0].ToString()));
-                Match m = rx.Match(content);
-                int count = 0;
-                while (m.Success && count < 3) {
-                    switch (count) {
-                        case 0:
-                            r.thirty = m.Groups[1].Value;
-                            break;
-                        case 1:
-                            r.sixty = m.Groups[1].Value;
-                            break;
+                        reader.Read();
+                        reader.Read();
+                        r.thirty = reader.Value.ToString();
 
-                        case 2:
-                            r.ninety = m.Groups[1].Value;
-                            break;
+                        reader.Read();
+                        reader.Read();
+                        r.sixty = reader.Value.ToString();
+
+                        reader.Read();
+                        reader.Read();
+                        r.ninety = reader.Value.ToString();
+
+                        reader.Read();
+                        reader.Read();
+                        reader.Read();
+                        reader.Read();
+                        r.name = reader.Value.ToString();
+
+                        attend.Add(r);
+
                     }
-
-                    m = m.NextMatch();
-                    count++;
                 }
 
-                attend.Add(r);
+                DBManager.getManager().emptyTable("attendance");
+                DBManager.getManager().bulkInsert(attend, "attendance");
             }
-
-            DBManager.getManager().emptyTable("attendance");
-            DBManager.getManager().bulkInsert(attend, "attendance");
         }
     }
 
