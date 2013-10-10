@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using log4net;
 using System.Threading;
+using System.Collections;
 
 namespace ROILootManager {
     public partial class frmMain : Form {
@@ -19,7 +20,6 @@ namespace ROILootManager {
         private bool summaryRosterChanging = false;
         private frmLootLog lootLogForm = new frmLootLog();
         private Thread logRefresher;
-        private String selectedTier;
         private bool includeRots = false;
 
         public frmMain() {
@@ -76,16 +76,37 @@ namespace ROILootManager {
 
             loadRosterNames();
 
-            String savedTier = PropertyManager.getManager().getProperty(PropertyManager.LAST_TIER_SELECTED);
+            List<String> savedTierList = new List<String>(PropertyManager.getManager().getProperty(PropertyManager.LAST_TIER_SELECTED).Split(','));
+
             DbDataReader rs = DBManager.getManager().executeQuery("SELECT DISTINCT tier FROM events ORDER BY tier");
-            List<String> tiers = new List<String>();
-            tiers.Add("All");
+
+            /*
+            ListViewItem item = new ListViewItem("All");
+            item.Text = "All";
+            item.Name = "All";
+
+            if (savedTierList.Count == 0 || savedTierList.Contains("All")) {
+                item.Checked = true;
+            }
+
+            lvTierSelection.Items.Add(item);
+             */
 
             while (rs.Read()) {
-                tiers.Add(rs[0].ToString());
-            }
-            cmbTierSelection.DataSource = tiers;
+                String t = rs[0].ToString();
 
+                ListViewItem item = new ListViewItem(t);
+                item.Text = t;
+                item.Name = t;
+
+                if (savedTierList.Contains(t)) {
+                    item.Checked = true;
+                }
+
+                lvTierSelection.Items.Add(item);
+            }
+
+            /*
             if (savedTier != null && !"".Equals(savedTier) && tiers.Contains(savedTier)) {
                 cmbTierSelection.SelectedItem = savedTier;
                 selectedTier = savedTier;
@@ -94,13 +115,10 @@ namespace ROILootManager {
                 selectedTier = "All";
                 PropertyManager.getManager().setProperty(PropertyManager.LAST_TIER_SELECTED, "All");
             }
+             */
 
-            //string savedIncludeRots = PropertyManager.getManager().getProperty(PropertyManager.INCLUDE_ROTS);
-            //if (savedIncludeRots != null && !"".Equals(savedIncludeRots) && "true".Equals(savedIncludeRots, StringComparison.InvariantCultureIgnoreCase)) {
-                //includeRots = true;
-            //} else {
-                includeRots = false;
-            //}
+
+            includeRots = false;
 
             chkIncludeRots.Checked = includeRots;
 
@@ -109,6 +127,7 @@ namespace ROILootManager {
             dgvNonVisibleSummary.SortCompare += new DataGridViewSortCompareEventHandler(lootSummarySorter);
             dgvWeaponSummary.SortCompare += new DataGridViewSortCompareEventHandler(lootSummarySorter);
             lvRosterNames.ItemChecked += new ItemCheckedEventHandler(lvRosterNames_ItemChecked);
+            lvTierSelection.ItemChecked += new ItemCheckedEventHandler(lvTierSelection_ItemChecked);
 
         }
 
@@ -230,11 +249,25 @@ namespace ROILootManager {
         }
 
         private String getTierFilter() {
+            if (lvTierSelection.CheckedItems.ContainsKey("All") || lvTierSelection.CheckedItems.Count == 0) {
+                return " ";
+            } else {
+                String search = "";
+                foreach (ListViewItem i in lvTierSelection.CheckedItems) {
+                    search += "'" + DBManager.safeParam(i.Text) + "', ";
+                }
+
+                search = search.Substring(0, search.Length - 2);
+                return " AND EXISTS(SELECT 1 FROM events WHERE short_event_name = l.short_event_name AND tier IN (" + search + ")) ";
+            }
+
+            /*
             if (selectedTier == null || "".Equals(selectedTier) || "All".Equals(selectedTier)) {
                 return " ";
             } else {
                 return " AND EXISTS(SELECT 1 FROM events WHERE short_event_name = l.short_event_name AND tier = '" + DBManager.safeParam(selectedTier) + "') ";
             }
+             */
         }
 
         private String getIncludeRotsFilter() {
@@ -265,7 +298,7 @@ namespace ROILootManager {
                 StringBuilder sql = new StringBuilder();
                 sql.AppendLine("SELECT r.name,");
                 sql.AppendLine("       (SELECT thirty || ' / ' || sixty || ' / ' || ninety FROM attendance WHERE name = r.name) AS attendance,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name" +  queryFilters + ") AS loot_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name" + queryFilters + ") AS loot_total,");
                 sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('Arms', 'Chest', 'Feet', 'Hands', 'Head', 'Legs', 'Wrist')" + queryFilters + ") AS visible_total,");
                 sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('Back', 'Charm', 'Ear', 'Face', 'Neck', 'Range', 'Ring', 'Shield', 'Shoulders', 'Waist')" + queryFilters + ") AS non_visible_total,");
                 sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('1HB', '1HP', '1HS', '2HB', '2HP', '2HS', 'HTH')" + queryFilters + ") AS weapon_total,");
@@ -686,6 +719,23 @@ namespace ROILootManager {
             }
         }
 
+        private void lvTierSelection_ItemChecked(object sender, ItemCheckedEventArgs e) {
+            String items = "";
+            foreach (ListViewItem i in lvTierSelection.CheckedItems) {
+                items += i.Text + ",";
+            }
+
+            if (items.Length > 0) {
+                items = items.Substring(0, items.Length - 1);
+            }
+
+            PropertyManager.getManager().setProperty(PropertyManager.LAST_TIER_SELECTED, items);
+
+            if (!summaryRosterChanging) {
+                getLootSummary();
+            }
+        }
+
         private void dgvLootSummary_CellDoubleClick(object sender, DataGridViewCellEventArgs e) {
             if (e.RowIndex >= 0 && e.RowIndex < dgvLootSummary.Rows.Count) {
                 launchLootLogWindow(dgvLootSummary.Rows[e.RowIndex].Cells[0].Value.ToString());
@@ -798,17 +848,6 @@ namespace ROILootManager {
             } catch (Exception ex) {
                 MessageBox.Show("An error occured updating the spell data. Try updating again.\nError: " + ex);
             }
-        }
-
-        private void cmbTierSelection_SelectedValueChanged(object sender, EventArgs e) {
-            selectedTier = cmbTierSelection.Text;
-            if (selectedTier == null || "".Equals(selectedTier)) {
-                selectedTier = "All";
-            }
-
-            PropertyManager.getManager().setProperty(PropertyManager.LAST_TIER_SELECTED, selectedTier);
-
-            getLootSummary();
         }
 
         private void dgvNonVisibleSummary_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e) {

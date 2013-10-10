@@ -66,7 +66,8 @@
             this.cmbEvent = new System.Windows.Forms.ComboBox();
             this.cmbSlot = new System.Windows.Forms.ComboBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.cmbTierSelection = new System.Windows.Forms.ComboBox();
+            this.lvTierSelection = new System.Windows.Forms.ListView();
+            this.chkIncludeRots = new System.Windows.Forms.CheckBox();
             this.btnParseNames = new System.Windows.Forms.Button();
             this.txtParseNames = new System.Windows.Forms.TextBox();
             this.lvRosterNames = new System.Windows.Forms.ListView();
@@ -132,7 +133,7 @@
             this.clmSummaryLoot = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.clmAttendance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.clmSummaryname = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.chkIncludeRots = new System.Windows.Forms.CheckBox();
+            this.clmTiers = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.mnuMainMenu.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -519,8 +520,8 @@
             // tabPage2
             // 
             this.tabPage2.BackColor = System.Drawing.SystemColors.Control;
+            this.tabPage2.Controls.Add(this.lvTierSelection);
             this.tabPage2.Controls.Add(this.chkIncludeRots);
-            this.tabPage2.Controls.Add(this.cmbTierSelection);
             this.tabPage2.Controls.Add(this.btnParseNames);
             this.tabPage2.Controls.Add(this.txtParseNames);
             this.tabPage2.Controls.Add(this.lvRosterNames);
@@ -535,15 +536,30 @@
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "View Loot";
             // 
-            // cmbTierSelection
+            // lvTierSelection
             // 
-            this.cmbTierSelection.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbTierSelection.FormattingEnabled = true;
-            this.cmbTierSelection.Location = new System.Drawing.Point(9, 11);
-            this.cmbTierSelection.Name = "cmbTierSelection";
-            this.cmbTierSelection.Size = new System.Drawing.Size(66, 24);
-            this.cmbTierSelection.TabIndex = 9;
-            this.cmbTierSelection.SelectedValueChanged += new System.EventHandler(this.cmbTierSelection_SelectedValueChanged);
+            this.lvTierSelection.CheckBoxes = true;
+            this.lvTierSelection.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.clmTiers});
+            this.lvTierSelection.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
+            this.lvTierSelection.Location = new System.Drawing.Point(8, 12);
+            this.lvTierSelection.Name = "lvTierSelection";
+            this.lvTierSelection.ShowGroups = false;
+            this.lvTierSelection.Size = new System.Drawing.Size(89, 116);
+            this.lvTierSelection.TabIndex = 11;
+            this.lvTierSelection.UseCompatibleStateImageBehavior = false;
+            this.lvTierSelection.View = System.Windows.Forms.View.Details;
+            // 
+            // chkIncludeRots
+            // 
+            this.chkIncludeRots.AutoSize = true;
+            this.chkIncludeRots.Location = new System.Drawing.Point(204, 12);
+            this.chkIncludeRots.Name = "chkIncludeRots";
+            this.chkIncludeRots.Size = new System.Drawing.Size(113, 21);
+            this.chkIncludeRots.TabIndex = 10;
+            this.chkIncludeRots.Text = "Include Rots?";
+            this.chkIncludeRots.UseVisualStyleBackColor = true;
+            this.chkIncludeRots.CheckedChanged += new System.EventHandler(this.chkIncludeRots_CheckedChanged);
             // 
             // btnParseNames
             // 
@@ -570,9 +586,9 @@
             this.clmRosterName});
             this.lvRosterNames.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lvRosterNames.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
-            this.lvRosterNames.Location = new System.Drawing.Point(8, 45);
+            this.lvRosterNames.Location = new System.Drawing.Point(8, 143);
             this.lvRosterNames.Name = "lvRosterNames";
-            this.lvRosterNames.Size = new System.Drawing.Size(179, 560);
+            this.lvRosterNames.Size = new System.Drawing.Size(179, 462);
             this.lvRosterNames.TabIndex = 6;
             this.lvRosterNames.UseCompatibleStateImageBehavior = false;
             this.lvRosterNames.View = System.Windows.Forms.View.Details;
@@ -583,7 +599,7 @@
             // 
             // btnLootSummaryClear
             // 
-            this.btnLootSummaryClear.Location = new System.Drawing.Point(137, 6);
+            this.btnLootSummaryClear.Location = new System.Drawing.Point(137, 98);
             this.btnLootSummaryClear.Name = "btnLootSummaryClear";
             this.btnLootSummaryClear.Size = new System.Drawing.Size(50, 30);
             this.btnLootSummaryClear.TabIndex = 5;
@@ -593,7 +609,7 @@
             // 
             // btnLootSummaryAll
             // 
-            this.btnLootSummaryAll.Location = new System.Drawing.Point(81, 6);
+            this.btnLootSummaryAll.Location = new System.Drawing.Point(137, 62);
             this.btnLootSummaryAll.Name = "btnLootSummaryAll";
             this.btnLootSummaryAll.Size = new System.Drawing.Size(50, 30);
             this.btnLootSummaryAll.TabIndex = 4;
@@ -1084,17 +1100,6 @@
             this.clmSummaryname.Name = "clmSummaryname";
             this.clmSummaryname.ReadOnly = true;
             // 
-            // chkIncludeRots
-            // 
-            this.chkIncludeRots.AutoSize = true;
-            this.chkIncludeRots.Location = new System.Drawing.Point(204, 12);
-            this.chkIncludeRots.Name = "chkIncludeRots";
-            this.chkIncludeRots.Size = new System.Drawing.Size(113, 21);
-            this.chkIncludeRots.TabIndex = 10;
-            this.chkIncludeRots.Text = "Include Rots?";
-            this.chkIncludeRots.UseVisualStyleBackColor = true;
-            this.chkIncludeRots.CheckedChanged += new System.EventHandler(this.chkIncludeRots_CheckedChanged);
-            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1237,8 +1242,9 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn clmLootSummarySpecial;
         private System.Windows.Forms.DataGridViewTextBoxColumn clmLootSummaryAlt;
         private System.Windows.Forms.DataGridViewTextBoxColumn clmLootSummaryLastLootDate;
-        private System.Windows.Forms.ComboBox cmbTierSelection;
         private System.Windows.Forms.CheckBox chkIncludeRots;
+        private System.Windows.Forms.ListView lvTierSelection;
+        private System.Windows.Forms.ColumnHeader clmTiers;
     }
 }
 
