@@ -77,23 +77,9 @@ namespace ROILootManager {
             loadRosterNames();
 
             List<String> savedTierList = new List<String>(PropertyManager.getManager().getProperty(PropertyManager.LAST_TIER_SELECTED).Split(','));
+            List<String> tierList = lootLog.getTiers();
 
-            DbDataReader rs = DBManager.getManager().executeQuery("SELECT DISTINCT tier FROM events ORDER BY tier");
-
-            /*
-            ListViewItem item = new ListViewItem("All");
-            item.Text = "All";
-            item.Name = "All";
-
-            if (savedTierList.Count == 0 || savedTierList.Contains("All")) {
-                item.Checked = true;
-            }
-
-            lvTierSelection.Items.Add(item);
-             */
-
-            while (rs.Read()) {
-                String t = rs[0].ToString();
+            foreach(String t in tierList) {
 
                 ListViewItem item = new ListViewItem(t);
                 item.Text = t;
@@ -105,18 +91,6 @@ namespace ROILootManager {
 
                 lvTierSelection.Items.Add(item);
             }
-
-            /*
-            if (savedTier != null && !"".Equals(savedTier) && tiers.Contains(savedTier)) {
-                cmbTierSelection.SelectedItem = savedTier;
-                selectedTier = savedTier;
-            } else {
-                cmbTierSelection.SelectedItem = "All";
-                selectedTier = "All";
-                PropertyManager.getManager().setProperty(PropertyManager.LAST_TIER_SELECTED, "All");
-            }
-             */
-
 
             includeRots = false;
 

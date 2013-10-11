@@ -70,11 +70,11 @@ namespace ROILootManager {
             command = new SQLiteCommand(sql, conn);
             command.ExecuteNonQuery();
 
-            sql = "CREATE TABLE events (event VARCHAR(100), short_event_name VARCHAR(50), tier VARCHAR(5));";
+            sql = "CREATE TABLE events (event VARCHAR(100), short_event_name VARCHAR(50), tier VARCHAR(25));";
             command = new SQLiteCommand(sql, conn);
             command.ExecuteNonQuery();
 
-            sql = "CREATE TABLE items (slot VARCHAR(20), item VARCHAR(150), short_event_name VARCHAR(50), is_global VARCHAR(3), tier VARCHAR(5), is_special VARCHAR(3));";
+            sql = "CREATE TABLE items (slot VARCHAR(20), item VARCHAR(150), short_event_name VARCHAR(50), is_global VARCHAR(3), tier VARCHAR(25), is_special VARCHAR(3));";
             command = new SQLiteCommand(sql, conn);
             command.ExecuteNonQuery();
 

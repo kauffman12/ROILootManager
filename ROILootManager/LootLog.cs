@@ -13,6 +13,7 @@ namespace ROILootManager {
 
         private List<EventEntry> events = new List<EventEntry>();
         private List<ArmorTypeEntry> armorTypes = new List<ArmorTypeEntry>();
+        private List<String> tiers = new List<String>();
 
         private string logURI;
 
@@ -21,7 +22,8 @@ namespace ROILootManager {
         public const string EVENT_EVENT_COL = "event";
         public const string EVENT_SHORT_COL = "shortname";
         public const string EVENT_TIER_COL = "tier";
-        public const string ARMOR_TYPES_NAME_COL = "armortypes";
+        public const string CONSTANTS_ARMOR_TYPES_NAME_COL = "armortypes";
+        public const string CONSTANTS_TIER_COL = "tiers";
 
         public bool isLoading = false;
 
@@ -54,6 +56,10 @@ namespace ROILootManager {
 
         public List<EventEntry> getEvents() {
             return events;
+        }
+
+        public List<String> getTiers() {
+            return tiers;
         }
 
         public List<ArmorTypeEntry> getArmorTypes() {
@@ -145,7 +151,7 @@ namespace ROILootManager {
 
             // Fetch the list feed of the worksheet.
             ListQuery listQuery = new ListQuery(listFeedLink.HRef.ToString());
-            listQuery.OrderByColumn = ARMOR_TYPES_NAME_COL;
+            listQuery.OrderByColumn = CONSTANTS_ARMOR_TYPES_NAME_COL;
 
 
 
@@ -160,15 +166,22 @@ namespace ROILootManager {
                 // Iterate over the remaining columns, and print each cell value
                 foreach (ListEntry.Custom element in row.Elements) {
                     //logger.Debug(element.Value);
-                    switch (element.LocalName.ToLower()) {
-                        case ARMOR_TYPES_NAME_COL:
-                            at.armorType = element.Value;
-                            break;
+                    if (element.Value.Length > 0) {
+                        switch (element.LocalName.ToLower()) {
+                            case CONSTANTS_ARMOR_TYPES_NAME_COL:
+                                at.armorType = element.Value;
+                                break;
+                            case CONSTANTS_TIER_COL:
+                                tiers.Add(element.Value);
+                                break;
+                        }
                     }
                 }
 
                 armorTypes.Add(at);
             }
+
+            tiers.Reverse();
 
             logger.Info("Events loaded successfully. " + events.Count + " entries.");
         }

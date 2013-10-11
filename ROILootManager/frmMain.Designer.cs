@@ -67,6 +67,7 @@
             this.cmbSlot = new System.Windows.Forms.ComboBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.lvTierSelection = new System.Windows.Forms.ListView();
+            this.clmTiers = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.chkIncludeRots = new System.Windows.Forms.CheckBox();
             this.btnParseNames = new System.Windows.Forms.Button();
             this.txtParseNames = new System.Windows.Forms.TextBox();
@@ -133,7 +134,6 @@
             this.clmSummaryLoot = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.clmAttendance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.clmSummaryname = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.clmTiers = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.mnuMainMenu.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -343,6 +343,7 @@
             this.txtOfficerChat.Location = new System.Drawing.Point(6, 355);
             this.txtOfficerChat.Multiline = true;
             this.txtOfficerChat.Name = "txtOfficerChat";
+            this.txtOfficerChat.ReadOnly = true;
             this.txtOfficerChat.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.txtOfficerChat.Size = new System.Drawing.Size(815, 235);
             this.txtOfficerChat.TabIndex = 11;
@@ -361,6 +362,7 @@
             this.txtGuildChat.Location = new System.Drawing.Point(6, 55);
             this.txtGuildChat.Multiline = true;
             this.txtGuildChat.Name = "txtGuildChat";
+            this.txtGuildChat.ReadOnly = true;
             this.txtGuildChat.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.txtGuildChat.Size = new System.Drawing.Size(815, 235);
             this.txtGuildChat.TabIndex = 9;
@@ -545,10 +547,14 @@
             this.lvTierSelection.Location = new System.Drawing.Point(8, 12);
             this.lvTierSelection.Name = "lvTierSelection";
             this.lvTierSelection.ShowGroups = false;
-            this.lvTierSelection.Size = new System.Drawing.Size(89, 116);
+            this.lvTierSelection.Size = new System.Drawing.Size(123, 116);
             this.lvTierSelection.TabIndex = 11;
             this.lvTierSelection.UseCompatibleStateImageBehavior = false;
             this.lvTierSelection.View = System.Windows.Forms.View.Details;
+            // 
+            // clmTiers
+            // 
+            this.clmTiers.Width = 100;
             // 
             // chkIncludeRots
             // 
