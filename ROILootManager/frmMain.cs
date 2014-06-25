@@ -135,6 +135,7 @@ namespace ROILootManager {
             string col2 = e.CellValue2.ToString();
             switch (e.Column.Name) {
                 case "clmLootSummaryLastLootDate":
+                case "clmLootSummaryAltLastLootDate":
                 case "clmVisibleSummaryLastLoot":
                 case "clmNonVisibleSummaryLastLootDate":
                 case "clmWeaponSummaryLastLoot":
@@ -276,10 +277,10 @@ namespace ROILootManager {
                 sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('Arms', 'Chest', 'Feet', 'Hands', 'Head', 'Legs', 'Wrist')" + queryFilters + ") AS visible_total,");
                 sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('Back', 'Charm', 'Ear', 'Face', 'Neck', 'Range', 'Ring', 'Shield', 'Shoulders', 'Waist')" + queryFilters + ") AS non_visible_total,");
                 sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND slot IN ('1HB', '1HP', '1HS', '2HB', '2HP', '2HS', 'HTH')" + queryFilters + ") AS weapon_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND rot = 'Yes'" + getTierFilter() + ") AS rot_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name " + getIncludeRotsFilter() + " AND l.short_event_name = 'NTOV: Vulak''Aerr' AND NOT EXISTS(SELECT 1 FROM items AS i WHERE i.item = l.item AND is_global = 'Yes')) AS vulak_toal,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l, items AS i WHERE name = r.name " + getIncludeRotsFilter() + " AND UPPER(l.item) = UPPER(i.item) AND i.is_special = 'Yes') AS special_total,");
-                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND alt_loot = 'Yes') AS alt_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND rot = 'Yes'" + getTierFilter() + " AND alt_loot <> 'Yes') AS rot_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM (SELECT DISTINCT i.item FROM loot AS l, items AS i WHERE name = r.name " + queryFilters + " AND UPPER(l.item) = UPPER(i.item) AND i.is_special = 'Yes')) AS special_total,");
+                sql.AppendLine("       (SELECT COUNT(1) FROM loot AS l WHERE name = r.name AND alt_loot = 'Yes'" + getTierFilter() + ") AS alt_total,");
+                sql.AppendLine("       strftime('%m/%d/%Y', (SELECT MAX(loot_date) FROM loot AS l WHERE name = r.name AND alt_loot = 'Yes'" + getTierFilter() + ")) AS alt_last_loot_date,");
                 sql.AppendLine("       strftime('%m/%d/%Y', (SELECT MAX(loot_date) FROM loot AS l WHERE name = r.name" + queryFilters + ")) AS last_loot_date");
                 sql.AppendLine("FROM   roster AS r");
                 sql.AppendLine("WHERE  r.active = 'Yes'");
@@ -411,15 +412,16 @@ namespace ROILootManager {
             sql.AppendLine("       item,");
             sql.AppendLine("       slot,");
             sql.AppendLine("       rot,");
-            sql.AppendLine("       alt_loot");
-            sql.AppendLine("FROM   loot");
+            sql.AppendLine("       alt_loot,");
+            sql.AppendLine("       (SELECT DISTINCT is_special FROM items AS i WHERE UPPER(l.item) = UPPER(i.item))");
+            sql.AppendLine("FROM   loot AS l");
             sql.AppendLine("WHERE  name = '" + DBManager.safeParam(name) + "'");
             sql.AppendLine("ORDER BY loot_date");
 
             DbDataReader rs = DBManager.getManager().executeQuery(sql.ToString());
 
             while (rs.Read()) {
-                lootLogForm.getView().Rows.Add(new string[] { rs[0].ToString(), rs[1].ToString(), rs[2].ToString(), rs[3].ToString(), rs[4].ToString(), rs[5].ToString() });
+                lootLogForm.getView().Rows.Add(new string[] { rs[0].ToString(), rs[1].ToString(), rs[2].ToString(), rs[3].ToString(), rs[4].ToString(), rs[5].ToString(), rs[6].ToString() });
             }
 
             rs.Close();
@@ -743,7 +745,7 @@ namespace ROILootManager {
             if (e.Control && e.KeyCode == Keys.C) {
                 DataGridViewRow row = ((DataGridView)sender).CurrentRow;
                 if (row != null && row.Cells.Count > 0) {
-                    string str = String.Format("{0}: Attendance: {1}, Total: {2}, Vis: {3}, Non-Vis: {4}, Weapon: {5}, Rot: {6}, Vulak: {7}, Sp: {8}, Alt: {9} LL: {10}",
+                    string str = String.Format("{0}: Attendance: {1}, Total: {2}, Vis: {3}, Non-Vis: {4}, Weapon: {5}, Rot: {6}, Sp: {7}, Alt: {8}, Alt LL: {9} LL: {10}",
                          row.Cells[0].Value.ToString(), row.Cells[1].Value.ToString(), row.Cells[2].Value.ToString(), row.Cells[3].Value.ToString(),
                            row.Cells[4].Value.ToString(), row.Cells[5].Value.ToString(), row.Cells[6].Value.ToString(), row.Cells[7].Value.ToString(),
                              row.Cells[8].Value.ToString(), row.Cells[9].Value.ToString(), row.Cells[10].Value.ToString());

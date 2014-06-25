@@ -35,6 +35,7 @@
             this.clmLootLogSlot = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.clmLootLogRot = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.clmLootLogAltLoot = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.clmLootLogSpecialLoot = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvLootLog)).BeginInit();
             this.SuspendLayout();
             // 
@@ -49,12 +50,13 @@
             this.clmLootLogItem,
             this.clmLootLogSlot,
             this.clmLootLogRot,
-            this.clmLootLogAltLoot});
+            this.clmLootLogAltLoot,
+            this.clmLootLogSpecialLoot});
             this.dgvLootLog.Location = new System.Drawing.Point(13, 12);
             this.dgvLootLog.Margin = new System.Windows.Forms.Padding(4);
             this.dgvLootLog.Name = "dgvLootLog";
             this.dgvLootLog.ReadOnly = true;
-            this.dgvLootLog.Size = new System.Drawing.Size(665, 356);
+            this.dgvLootLog.Size = new System.Drawing.Size(755, 380);
             this.dgvLootLog.TabIndex = 0;
             // 
             // clmLootLogDate
@@ -93,11 +95,18 @@
             this.clmLootLogAltLoot.Name = "clmLootLogAltLoot";
             this.clmLootLogAltLoot.ReadOnly = true;
             // 
+            // clmLootLogSpecialLoot
+            // 
+            this.clmLootLogSpecialLoot.HeaderText = "Is Special";
+            this.clmLootLogSpecialLoot.Name = "clmLootLogSpecialLoot";
+            this.clmLootLogSpecialLoot.ReadOnly = true;
+            this.clmLootLogSpecialLoot.Width = 75;
+            // 
             // frmLootLog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(693, 398);
+            this.ClientSize = new System.Drawing.Size(788, 416);
             this.Controls.Add(this.dgvLootLog);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Margin = new System.Windows.Forms.Padding(4);
@@ -117,5 +126,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn clmLootLogSlot;
         private System.Windows.Forms.DataGridViewTextBoxColumn clmLootLogRot;
         private System.Windows.Forms.DataGridViewTextBoxColumn clmLootLogAltLoot;
+        private System.Windows.Forms.DataGridViewTextBoxColumn clmLootLogSpecialLoot;
     }
 }

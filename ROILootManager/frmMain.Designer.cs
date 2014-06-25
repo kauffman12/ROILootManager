@@ -76,17 +76,6 @@
             this.btnLootSummaryClear = new System.Windows.Forms.Button();
             this.btnLootSummaryAll = new System.Windows.Forms.Button();
             this.dgvLootSummary = new System.Windows.Forms.DataGridView();
-            this.clmLootSummaryName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.clmLootSummaryAttendance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.clmLootSummaryTotal = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.clmLootSummaryVisibles = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.clmLootSummaryNonVisibles = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.clmLootSummaryWeapons = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.clmLootSummaryRots = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.clmLootSummaryVulak = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.clmLootSummarySpecial = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.clmLootSummaryAlt = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.clmLootSummaryLastLootDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.dgvVisibleSummary = new System.Windows.Forms.DataGridView();
             this.clmVisibleSummaryName = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -134,6 +123,17 @@
             this.clmSummaryLoot = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.clmAttendance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.clmSummaryname = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.clmLootSummaryName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.clmLootSummaryAttendance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.clmLootSummaryTotal = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.clmLootSummaryVisibles = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.clmLootSummaryNonVisibles = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.clmLootSummaryWeapons = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.clmLootSummaryRots = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.clmLootSummarySpecial = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.clmLootSummaryAlt = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.clmLootSummaryAltLastLootDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.clmLootSummaryLastLootDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.mnuMainMenu.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -167,13 +167,13 @@
             this.selectLootLogToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(35, 20);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
             // 
             // selectLogFileToolStripMenuItem
             // 
             this.selectLogFileToolStripMenuItem.Name = "selectLogFileToolStripMenuItem";
-            this.selectLogFileToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.selectLogFileToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
             this.selectLogFileToolStripMenuItem.Text = "Select Log File";
             this.selectLogFileToolStripMenuItem.Click += new System.EventHandler(this.selectLogFileToolStripMenuItem_Click);
             // 
@@ -183,27 +183,27 @@
             this.miRainOfFear,
             this.miTestLogFile});
             this.selectLootLogToolStripMenuItem.Name = "selectLootLogToolStripMenuItem";
-            this.selectLootLogToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.selectLootLogToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
             this.selectLootLogToolStripMenuItem.Text = "Select Loot Log";
             // 
             // miRainOfFear
             // 
             this.miRainOfFear.Name = "miRainOfFear";
-            this.miRainOfFear.Size = new System.Drawing.Size(153, 22);
+            this.miRainOfFear.Size = new System.Drawing.Size(159, 22);
             this.miRainOfFear.Text = "Rain of Fear Log";
             this.miRainOfFear.Click += new System.EventHandler(this.miRainOfFear_Click);
             // 
             // miTestLogFile
             // 
             this.miTestLogFile.Name = "miTestLogFile";
-            this.miTestLogFile.Size = new System.Drawing.Size(153, 22);
+            this.miTestLogFile.Size = new System.Drawing.Size(159, 22);
             this.miTestLogFile.Text = "Test Log File";
             this.miTestLogFile.Click += new System.EventHandler(this.miTestLogFile_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -215,27 +215,27 @@
             this.addMissingItemsToolStripMenuItem,
             this.spellsToolStripMenuItem});
             this.actionsToolStripMenuItem.Name = "actionsToolStripMenuItem";
-            this.actionsToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
+            this.actionsToolStripMenuItem.Size = new System.Drawing.Size(59, 20);
             this.actionsToolStripMenuItem.Text = "Actions";
             // 
             // loadAttendanceToolStripMenuItem
             // 
             this.loadAttendanceToolStripMenuItem.Name = "loadAttendanceToolStripMenuItem";
-            this.loadAttendanceToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.loadAttendanceToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
             this.loadAttendanceToolStripMenuItem.Text = "Load Attendance";
             this.loadAttendanceToolStripMenuItem.Click += new System.EventHandler(this.loadAttendanceToolStripMenuItem_Click);
             // 
             // reloadLootLogToolStripMenuItem
             // 
             this.reloadLootLogToolStripMenuItem.Name = "reloadLootLogToolStripMenuItem";
-            this.reloadLootLogToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.reloadLootLogToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
             this.reloadLootLogToolStripMenuItem.Text = "Reload Loot Log";
             this.reloadLootLogToolStripMenuItem.Click += new System.EventHandler(this.reloadLootLogToolStripMenuItem_Click);
             // 
             // addMissingItemsToolStripMenuItem
             // 
             this.addMissingItemsToolStripMenuItem.Name = "addMissingItemsToolStripMenuItem";
-            this.addMissingItemsToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.addMissingItemsToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
             this.addMissingItemsToolStripMenuItem.Text = "Add Missing Items";
             this.addMissingItemsToolStripMenuItem.Click += new System.EventHandler(this.addMissingItemsToolStripMenuItem_Click);
             // 
@@ -245,20 +245,20 @@
             this.loadFromRosterToolStripMenuItem,
             this.reloadPrioritiesToolStripMenuItem});
             this.spellsToolStripMenuItem.Name = "spellsToolStripMenuItem";
-            this.spellsToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.spellsToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
             this.spellsToolStripMenuItem.Text = "Spells";
             // 
             // loadFromRosterToolStripMenuItem
             // 
             this.loadFromRosterToolStripMenuItem.Name = "loadFromRosterToolStripMenuItem";
-            this.loadFromRosterToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
+            this.loadFromRosterToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
             this.loadFromRosterToolStripMenuItem.Text = "Load from Roster";
             this.loadFromRosterToolStripMenuItem.Click += new System.EventHandler(this.loadFromRosterToolStripMenuItem_Click);
             // 
             // reloadPrioritiesToolStripMenuItem
             // 
             this.reloadPrioritiesToolStripMenuItem.Name = "reloadPrioritiesToolStripMenuItem";
-            this.reloadPrioritiesToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
+            this.reloadPrioritiesToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
             this.reloadPrioritiesToolStripMenuItem.Text = "Reload Priorities";
             this.reloadPrioritiesToolStripMenuItem.Click += new System.EventHandler(this.reloadPrioritiesToolStripMenuItem_Click);
             // 
@@ -636,9 +636,9 @@
             this.clmLootSummaryNonVisibles,
             this.clmLootSummaryWeapons,
             this.clmLootSummaryRots,
-            this.clmLootSummaryVulak,
             this.clmLootSummarySpecial,
             this.clmLootSummaryAlt,
+            this.clmLootSummaryAltLastLootDate,
             this.clmLootSummaryLastLootDate});
             this.dgvLootSummary.Location = new System.Drawing.Point(204, 45);
             this.dgvLootSummary.Name = "dgvLootSummary";
@@ -648,80 +648,6 @@
             this.dgvLootSummary.TabIndex = 3;
             this.dgvLootSummary.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvLootSummary_CellDoubleClick);
             this.dgvLootSummary.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dgvLootSummary_KeyDown);
-            // 
-            // clmLootSummaryName
-            // 
-            this.clmLootSummaryName.HeaderText = "Name";
-            this.clmLootSummaryName.Name = "clmLootSummaryName";
-            this.clmLootSummaryName.ReadOnly = true;
-            // 
-            // clmLootSummaryAttendance
-            // 
-            this.clmLootSummaryAttendance.HeaderText = "Attendance";
-            this.clmLootSummaryAttendance.Name = "clmLootSummaryAttendance";
-            this.clmLootSummaryAttendance.ReadOnly = true;
-            this.clmLootSummaryAttendance.Width = 120;
-            // 
-            // clmLootSummaryTotal
-            // 
-            this.clmLootSummaryTotal.HeaderText = "Loot Total";
-            this.clmLootSummaryTotal.Name = "clmLootSummaryTotal";
-            this.clmLootSummaryTotal.ReadOnly = true;
-            // 
-            // clmLootSummaryVisibles
-            // 
-            this.clmLootSummaryVisibles.HeaderText = "Visibles";
-            this.clmLootSummaryVisibles.Name = "clmLootSummaryVisibles";
-            this.clmLootSummaryVisibles.ReadOnly = true;
-            this.clmLootSummaryVisibles.Width = 80;
-            // 
-            // clmLootSummaryNonVisibles
-            // 
-            this.clmLootSummaryNonVisibles.HeaderText = "Non-Visibles";
-            this.clmLootSummaryNonVisibles.Name = "clmLootSummaryNonVisibles";
-            this.clmLootSummaryNonVisibles.ReadOnly = true;
-            this.clmLootSummaryNonVisibles.Width = 90;
-            // 
-            // clmLootSummaryWeapons
-            // 
-            this.clmLootSummaryWeapons.HeaderText = "Weapons";
-            this.clmLootSummaryWeapons.Name = "clmLootSummaryWeapons";
-            this.clmLootSummaryWeapons.ReadOnly = true;
-            this.clmLootSummaryWeapons.Width = 80;
-            // 
-            // clmLootSummaryRots
-            // 
-            this.clmLootSummaryRots.HeaderText = "Rots";
-            this.clmLootSummaryRots.Name = "clmLootSummaryRots";
-            this.clmLootSummaryRots.ReadOnly = true;
-            this.clmLootSummaryRots.Width = 60;
-            // 
-            // clmLootSummaryVulak
-            // 
-            this.clmLootSummaryVulak.HeaderText = "Vulak";
-            this.clmLootSummaryVulak.Name = "clmLootSummaryVulak";
-            this.clmLootSummaryVulak.ReadOnly = true;
-            this.clmLootSummaryVulak.Width = 60;
-            // 
-            // clmLootSummarySpecial
-            // 
-            this.clmLootSummarySpecial.HeaderText = "Special";
-            this.clmLootSummarySpecial.Name = "clmLootSummarySpecial";
-            this.clmLootSummarySpecial.ReadOnly = true;
-            this.clmLootSummarySpecial.Width = 60;
-            // 
-            // clmLootSummaryAlt
-            // 
-            this.clmLootSummaryAlt.HeaderText = "Alt";
-            this.clmLootSummaryAlt.Name = "clmLootSummaryAlt";
-            this.clmLootSummaryAlt.ReadOnly = true;
-            this.clmLootSummaryAlt.Width = 50;
-            // 
-            // clmLootSummaryLastLootDate
-            // 
-            this.clmLootSummaryLastLootDate.HeaderText = "Last Loot Date";
-            this.clmLootSummaryLastLootDate.Name = "clmLootSummaryLastLootDate";
-            this.clmLootSummaryLastLootDate.ReadOnly = true;
             // 
             // tabPage3
             // 
@@ -1106,11 +1032,85 @@
             this.clmSummaryname.Name = "clmSummaryname";
             this.clmSummaryname.ReadOnly = true;
             // 
+            // clmLootSummaryName
+            // 
+            this.clmLootSummaryName.HeaderText = "Name";
+            this.clmLootSummaryName.Name = "clmLootSummaryName";
+            this.clmLootSummaryName.ReadOnly = true;
+            // 
+            // clmLootSummaryAttendance
+            // 
+            this.clmLootSummaryAttendance.HeaderText = "Attendance";
+            this.clmLootSummaryAttendance.Name = "clmLootSummaryAttendance";
+            this.clmLootSummaryAttendance.ReadOnly = true;
+            this.clmLootSummaryAttendance.Width = 120;
+            // 
+            // clmLootSummaryTotal
+            // 
+            this.clmLootSummaryTotal.HeaderText = "Loot Total";
+            this.clmLootSummaryTotal.Name = "clmLootSummaryTotal";
+            this.clmLootSummaryTotal.ReadOnly = true;
+            this.clmLootSummaryTotal.Width = 75;
+            // 
+            // clmLootSummaryVisibles
+            // 
+            this.clmLootSummaryVisibles.HeaderText = "Visibles";
+            this.clmLootSummaryVisibles.Name = "clmLootSummaryVisibles";
+            this.clmLootSummaryVisibles.ReadOnly = true;
+            this.clmLootSummaryVisibles.Width = 75;
+            // 
+            // clmLootSummaryNonVisibles
+            // 
+            this.clmLootSummaryNonVisibles.HeaderText = "Non-Visibles";
+            this.clmLootSummaryNonVisibles.Name = "clmLootSummaryNonVisibles";
+            this.clmLootSummaryNonVisibles.ReadOnly = true;
+            this.clmLootSummaryNonVisibles.Width = 90;
+            // 
+            // clmLootSummaryWeapons
+            // 
+            this.clmLootSummaryWeapons.HeaderText = "Weapons";
+            this.clmLootSummaryWeapons.Name = "clmLootSummaryWeapons";
+            this.clmLootSummaryWeapons.ReadOnly = true;
+            this.clmLootSummaryWeapons.Width = 80;
+            // 
+            // clmLootSummaryRots
+            // 
+            this.clmLootSummaryRots.HeaderText = "Rots";
+            this.clmLootSummaryRots.Name = "clmLootSummaryRots";
+            this.clmLootSummaryRots.ReadOnly = true;
+            this.clmLootSummaryRots.Width = 60;
+            // 
+            // clmLootSummarySpecial
+            // 
+            this.clmLootSummarySpecial.HeaderText = "Special";
+            this.clmLootSummarySpecial.Name = "clmLootSummarySpecial";
+            this.clmLootSummarySpecial.ReadOnly = true;
+            this.clmLootSummarySpecial.Width = 60;
+            // 
+            // clmLootSummaryAlt
+            // 
+            this.clmLootSummaryAlt.HeaderText = "Alt";
+            this.clmLootSummaryAlt.Name = "clmLootSummaryAlt";
+            this.clmLootSummaryAlt.ReadOnly = true;
+            this.clmLootSummaryAlt.Width = 50;
+            // 
+            // clmLootSummaryAltLastLootDate
+            // 
+            this.clmLootSummaryAltLastLootDate.HeaderText = "Alt LL";
+            this.clmLootSummaryAltLastLootDate.Name = "clmLootSummaryAltLastLootDate";
+            this.clmLootSummaryAltLastLootDate.ReadOnly = true;
+            // 
+            // clmLootSummaryLastLootDate
+            // 
+            this.clmLootSummaryLastLootDate.HeaderText = "Last Loot Date";
+            this.clmLootSummaryLastLootDate.Name = "clmLootSummaryLastLootDate";
+            this.clmLootSummaryLastLootDate.ReadOnly = true;
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1192, 673);
+            this.ClientSize = new System.Drawing.Size(1192, 669);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.mnuMainMenu);
             this.MainMenuStrip = this.mnuMainMenu;
@@ -1237,6 +1237,9 @@
         private System.Windows.Forms.ToolStripMenuItem spellsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem loadFromRosterToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem reloadPrioritiesToolStripMenuItem;
+        private System.Windows.Forms.CheckBox chkIncludeRots;
+        private System.Windows.Forms.ListView lvTierSelection;
+        private System.Windows.Forms.ColumnHeader clmTiers;
         private System.Windows.Forms.DataGridViewTextBoxColumn clmLootSummaryName;
         private System.Windows.Forms.DataGridViewTextBoxColumn clmLootSummaryAttendance;
         private System.Windows.Forms.DataGridViewTextBoxColumn clmLootSummaryTotal;
@@ -1244,13 +1247,10 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn clmLootSummaryNonVisibles;
         private System.Windows.Forms.DataGridViewTextBoxColumn clmLootSummaryWeapons;
         private System.Windows.Forms.DataGridViewTextBoxColumn clmLootSummaryRots;
-        private System.Windows.Forms.DataGridViewTextBoxColumn clmLootSummaryVulak;
         private System.Windows.Forms.DataGridViewTextBoxColumn clmLootSummarySpecial;
         private System.Windows.Forms.DataGridViewTextBoxColumn clmLootSummaryAlt;
+        private System.Windows.Forms.DataGridViewTextBoxColumn clmLootSummaryAltLastLootDate;
         private System.Windows.Forms.DataGridViewTextBoxColumn clmLootSummaryLastLootDate;
-        private System.Windows.Forms.CheckBox chkIncludeRots;
-        private System.Windows.Forms.ListView lvTierSelection;
-        private System.Windows.Forms.ColumnHeader clmTiers;
     }
 }
 

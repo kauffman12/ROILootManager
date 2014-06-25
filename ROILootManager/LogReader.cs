@@ -18,7 +18,7 @@ namespace ROILootManager {
         private bool keepReading;
 
         public enum logTypes { GUILD_CHAT, OFFICER_CHAT };
-        private Regex guildChat = new Regex("tells the guild");
+        private Regex guildChat = new Regex("(tells the guild|say to your guild)");
         private Regex officerChat = new Regex("officersofroi:");
         //private Regex officerChat = new Regex("guildundertow:");
 
