@@ -1,6 +1,8 @@
 ﻿using System;
 
-namespace ROILootManager {
-    class CouldNotAuthException : Exception {
-    }
+namespace ROILootManager
+{
+  class CouldNotAuthException : Exception
+  {
+  }
 }
