@@ -16,23 +16,17 @@ namespace ROILootManager
     private string logFileName = "eqlog_Kizant_xegony2.txt";
     private string logFilePath = "C:\\Users\\Public\\Sony Online Entertainment\\Installed Games\\EverQuest\\Logs-Saved\\";
 
-    private Thread t;
-    private bool keepReading;
+    private Thread myThread;
+    private ThreadState threadState;
 
     public enum logTypes { GUILD_CHAT, OFFICER_CHAT };
     private Regex guildChat = new Regex("(tells the guild|say to your guild)");
-    private Regex officerChat = new Regex("officersofroi:");
+    private Regex officerChat = new Regex("(?i)officersofroi(?-i):");
     //private Regex officerChat = new Regex("guildundertow:");
 
     public event LogReaderEvent logEvent;
-
-    private FileSystemWatcher fsw;
-    private FileStream file;
-    StreamReader reader;
-
     public LogReader()
     {
-      //t = new Thread(ReadFromFile);
     }
 
     public bool setLogFile(string file)
@@ -51,122 +45,108 @@ namespace ROILootManager
 
     public void start()
     {
-      logger.Debug("Start call made...");
-      keepReading = true;
-
-      if (t != null && t.IsAlive)
+      if (threadState != null)
       {
-        t.Abort();
-        cleanUp();
+        threadState.stop();
       }
 
-      t = new Thread(ReadFromFile);
+      threadState = new ThreadState();
+      ThreadState myState = threadState;
 
-      t.Start();
+      myThread = new Thread(() =>
+      {
+        Boolean exitOnError = false;
+
+        // get file stream
+        FileStream fs = new FileStream(logFilePath + logFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+        StreamReader reader = new StreamReader(fs);
+
+        // setup watcher
+        FileSystemWatcher fsw = new FileSystemWatcher
+        {
+          Path = logFilePath,
+          Filter = logFileName
+        };
+
+        // events to notify for changes
+        fsw.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.CreationTime;
+
+        // read to end and start listening for events
+        reader.ReadToEnd();
+        fsw.EnableRaisingEvents = true;
+
+        while (myState.isRunning() && !exitOnError)
+        {
+          WaitForChangedResult result = fsw.WaitForChanged(WatcherChangeTypes.Deleted | WatcherChangeTypes.Changed, 2000);
+
+          // check if exit during wait period
+          if (!myState.isRunning() || exitOnError)
+          {
+            break;
+          }
+
+          switch (result.ChangeType)
+          {
+            case WatcherChangeTypes.Deleted:
+              // file gone
+              exitOnError = true;
+              break;
+            case WatcherChangeTypes.Changed:
+              if (reader != null)
+              {
+                while (!reader.EndOfStream)
+                {
+                  string line = reader.ReadLine();
+                  if (logEvent != null && line.Length > 0)
+                  {
+
+                    if (officerChat.IsMatch(line))
+                    {
+                      logger.Debug("Adding new Officer chat " + line);
+                      logEvent(this, new LogEventArgs(line, LogReader.logTypes.OFFICER_CHAT));
+                    }
+                    else if (guildChat.IsMatch(line))
+                    {
+                      logger.Debug("Adding new Guild Chat " + line);
+                      logEvent(this, new LogEventArgs(line, LogReader.logTypes.GUILD_CHAT));
+                    }
+                  }
+                }
+              }
+              break;
+          }
+        }
+
+        if (reader != null)
+        {
+          reader.Close();
+        }
+
+        if (fs != null)
+        {
+          fs.Close();
+        }
+
+        if (fsw != null)
+        {
+          fsw.Dispose();
+        }
+
+      });
+      
+      myThread.Start();
     }
 
     public void end()
     {
-      logger.Debug("End call made...");
-      // TODO this is horrible
-      keepReading = false;
-
-      if (t != null)
-        t.Abort();
-      cleanUp();
-    }
-
-    private void ReadFromFile()
-    {
-      long offset = 0;
-
-      fsw = new FileSystemWatcher
+      if (threadState != null)
       {
-        Path = logFilePath,
-        Filter = logFileName
-      };
-
-      ManualResetEvent workToDo = new ManualResetEvent(false);
-      fsw.NotifyFilter = NotifyFilters.LastWrite;
-      fsw.Changed += (source, e) => { workToDo.Set(); };
-      fsw.Created += (source, e) => { workToDo.Set(); };
-
-
-      file = File.Open(
-         logFilePath + logFileName,
-         FileMode.Open,
-         FileAccess.Read,
-         FileShare.ReadWrite);
-
-      reader = new StreamReader(file);
-
-      // Go to the end of the log and update the offset
-      reader.ReadToEnd();
-      offset = file.Position;
-
-      fsw.EnableRaisingEvents = true;
-
-      while (keepReading)
-      {
-        //fsw.WaitForChanged(WatcherChangeTypes.Changed);
-        if (workToDo.WaitOne())
-        {
-          workToDo.Reset();
-        }
-
-        file.Seek(offset, SeekOrigin.Begin);
-        if (!reader.EndOfStream)
-        {
-          do
-          {
-            string line = reader.ReadLine();
-            //logger.Debug(line);
-            if (logEvent != null && line.Length > 0)
-            {
-              if (officerChat.IsMatch(line))
-              {
-                logger.Debug("Adding new Officer chat " + line);
-                logEvent(this, new LogEventArgs(line, LogReader.logTypes.OFFICER_CHAT));
-              }
-              else if (guildChat.IsMatch(line))
-              {
-                logger.Debug("Adding new Guild Chat " + line);
-                logEvent(this, new LogEventArgs(line, LogReader.logTypes.GUILD_CHAT));
-              }
-
-            }
-          } while (!reader.EndOfStream);
-
-          offset = file.Position;
-        }
-        //Thread.Sleep(1000);
+        threadState.stop();
       }
 
-      logger.Debug("Main while loop ended...");
-
-      cleanUp();
-
-    }
-
-    public void cleanUp()
-    {
-      logger.Debug("Cleaning up...");
-      if (reader != null)
+      if (myThread != null)
       {
-        reader.Close();
-        reader = null;
-      }
-
-      if (file != null)
-      {
-        file.Close();
-        file = null;
-      }
-
-      if (fsw != null)
-      {
-        fsw.Dispose();
-        fsw = null;
+        myThread.Join(3000);
       }
     }
   }
@@ -179,6 +159,21 @@ namespace ROILootManager
     {
       this.line = line;
       this.type = type;
+    }
+  }
+
+  public class ThreadState
+  {
+    private Boolean running = true;
+
+    public void stop()
+    {
+      running = false;
+    }
+
+    public Boolean isRunning()
+    {
+      return running;
     }
   }
 }

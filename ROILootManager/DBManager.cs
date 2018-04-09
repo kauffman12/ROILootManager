@@ -6,7 +6,7 @@ using log4net;
 
 namespace ROILootManager
 {
-  class DBManager
+  class DBManager : IDisposable
   {
     private static ILog logger = LogManager.GetLogger(typeof(DBManager));
 
@@ -298,6 +298,15 @@ namespace ROILootManager
     {
       SQLiteCommand command = new SQLiteCommand(sql, conn);
       return command.ExecuteReader();
+    }
+
+    public void Dispose()
+    {
+      if (conn != null)
+      {
+        conn.Dispose();
+        conn = null;
+      }
     }
   }
 
