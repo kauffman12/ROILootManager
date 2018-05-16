@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"><?define ROILootManager_TargetDir=$(var.ROILootManager.TargetDir)?>
+	<Product Id="*" Name="ROILootManager" Language="1033" Version="1.0.0.0" Manufacturer="ROI" UpgradeCode="e104b83e-2a1b-4a6e-8d6c-279b973a43a0">
+		<Package Platform="x64" InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+		<Feature Id="ProductFeature" Title="ROILootManager" Level="1">
+			<ComponentGroupRef Id="ProductComponents" />
+      <ComponentRef Id="ApplicationShortcut" />
+    </Feature>
+
+    <Icon Id="roiIcon" SourceFile="$(var.ROILootManager.ProjectDir)\roi_icon.ico" />
+    <Property Id="APPPRODUCTICON" Value="roiIcon" />
+
+    <UI Id="WixUI_Advanced">
+      <UIRef Id="WixUI_InstallDir" />
+      <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+      
+      <!-- Skip license dialog -->
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg" Order="2">1</Publish>
+      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">1</Publish>
+    </UI>
+	</Product>
+
+	<Fragment>
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFiles64Folder">
+				<Directory Id="INSTALLFOLDER" Name="ROILootManager" />
+			</Directory>
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="ROI Loot Manager"/>
+      </Directory>      
+		</Directory>
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="ApplicationShortcut" Guid="94171F2F-378E-4C32-A362-DA85029578DD">
+        <Shortcut Id="ApplicationStartMenuShortcut"
+                  Name="ROI Loot Manager"
+                  Description="The ROI Loot Manager"
+                  Target="[INSTALLFOLDER]\ROILootManager.exe"
+                  WorkingDirectory="INSTALLFOLDER"/>
+        <RemoveFolder Id="CleanUpShortCut" Directory="ApplicationProgramsFolder" On="uninstall"/>
+        <RegistryValue Root="HKCU" Key="Software\Microsoft\MyApplicationName" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+      </Component>
+    </DirectoryRef>    
+	</Fragment>
+  
+	<Fragment>
+	  <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+	    <Component Win64="yes" Id="ROILootManager.exe" Guid="77f00121-0a67-4a6d-bd4b-6745789177db">
+	      <File Id="ROILootManager.exe" Name="ROILootManager.exe" Source="$(var.ROILootManager_TargetDir)ROILootManager.exe" />
+	    </Component>
+	    <Component Win64="yes" Id="ROILootManager.exe.config" Guid="67b701f9-343f-4c80-84a6-522132898583">
+	      <File Id="ROILootManager.exe.config" Name="ROILootManager.exe.config" Source="$(var.ROILootManager_TargetDir)ROILootManager.exe.config" />
+	    </Component>
+	    <Component Win64="yes" Id="EntityFramework.dll" Guid="94787b8f-fdc9-49ba-91ac-e2c9eeb67d44">
+	      <File Id="EntityFramework.dll" Name="EntityFramework.dll" Source="$(var.ROILootManager_TargetDir)EntityFramework.dll" />
+	    </Component>
+	    <Component Win64="yes" Id="EntityFramework.SqlServer.dll" Guid="6dabb915-b6ba-46c6-ae92-dc76e0a9df1b">
+	      <File Id="EntityFramework.SqlServer.dll" Name="EntityFramework.SqlServer.dll" Source="$(var.ROILootManager_TargetDir)EntityFramework.SqlServer.dll" />
+	    </Component>
+	    <Component Win64="yes" Id="Google.Apis.dll" Guid="7e455080-643c-421c-b7fc-3a04a50267a7">
+	      <File Id="Google.Apis.dll" Name="Google.Apis.dll" Source="$(var.ROILootManager_TargetDir)Google.Apis.dll" />
+	    </Component>
+	    <Component Win64="yes" Id="Google.Apis.Core.dll" Guid="1654272b-7dc2-429b-be4e-143c4ed160f2">
+	      <File Id="Google.Apis.Core.dll" Name="Google.Apis.Core.dll" Source="$(var.ROILootManager_TargetDir)Google.Apis.Core.dll" />
+	    </Component>
+	    <Component Win64="yes" Id="Google.Apis.Auth.dll" Guid="0e5877be-062c-45a9-aa01-0c6ff66ac012">
+	      <File Id="Google.Apis.Auth.dll" Name="Google.Apis.Auth.dll" Source="$(var.ROILootManager_TargetDir)Google.Apis.Auth.dll" />
+	    </Component>
+	    <Component Win64="yes" Id="Google.Apis.Auth.PlatformServices.dll" Guid="bb51ccbc-c257-45d8-af3c-0fdaf0b534ab">
+	      <File Id="Google.Apis.Auth.PlatformServices.dll" Name="Google.Apis.Auth.PlatformServices.dll" Source="$(var.ROILootManager_TargetDir)Google.Apis.Auth.PlatformServices.dll" />
+	    </Component>
+	    <Component Win64="yes" Id="Google.Apis.PlatformServices.dll" Guid="e3aa3de9-a79f-49e8-947a-3df192572e3e">
+	      <File Id="Google.Apis.PlatformServices.dll" Name="Google.Apis.PlatformServices.dll" Source="$(var.ROILootManager_TargetDir)Google.Apis.PlatformServices.dll" />
+	    </Component>
+	    <Component Win64="yes" Id="Google.Apis.Sheets.v4.dll" Guid="7a0ba86d-2ae6-48cb-8679-67b3b79c6412">
+	      <File Id="Google.Apis.Sheets.v4.dll" Name="Google.Apis.Sheets.v4.dll" Source="$(var.ROILootManager_TargetDir)Google.Apis.Sheets.v4.dll" />
+	    </Component>
+	    <Component Win64="yes" Id="Google.GData.Client.dll" Guid="23090e2d-4573-4237-9af0-9eb8708cc978">
+	      <File Id="Google.GData.Client.dll" Name="Google.GData.Client.dll" Source="$(var.ROILootManager_TargetDir)Google.GData.Client.dll" />
+	    </Component>
+	    <Component Win64="yes" Id="Google.GData.Extensions.dll" Guid="832362b8-6556-4066-87e3-995bc8274ab3">
+	      <File Id="Google.GData.Extensions.dll" Name="Google.GData.Extensions.dll" Source="$(var.ROILootManager_TargetDir)Google.GData.Extensions.dll" />
+	    </Component>
+	    <Component Win64="yes" Id="Google.GData.Spreadsheets.dll" Guid="bb42427a-fade-46f2-9c96-a026f60b4b39">
+	      <File Id="Google.GData.Spreadsheets.dll" Name="Google.GData.Spreadsheets.dll" Source="$(var.ROILootManager_TargetDir)Google.GData.Spreadsheets.dll" />
+	    </Component>
+	    <Component Win64="yes" Id="Microsoft.Threading.Tasks.dll" Guid="b3867f68-e6bc-4509-803d-d0a83c9d3891">
+	      <File Id="Microsoft.Threading.Tasks.dll" Name="Microsoft.Threading.Tasks.dll" Source="$(var.ROILootManager_TargetDir)Microsoft.Threading.Tasks.dll" />
+	    </Component>
+	    <Component Win64="yes" Id="log4net.dll" Guid="236cad78-dba4-4e5f-a614-10ab392278d1">
+	      <File Id="log4net.dll" Name="log4net.dll" Source="$(var.ROILootManager_TargetDir)log4net.dll" />
+	    </Component>
+	    <Component Win64="yes" Id="Microsoft.Threading.Tasks.Extensions.dll" Guid="66a3b5c1-af1a-455e-8cf7-5b2473ea196d">
+	      <File Id="Microsoft.Threading.Tasks.Extensions.dll" Name="Microsoft.Threading.Tasks.Extensions.dll" Source="$(var.ROILootManager_TargetDir)Microsoft.Threading.Tasks.Extensions.dll" />
+	    </Component>
+	    <Component Win64="yes" Id="Microsoft.Threading.Tasks.Extensions.Desktop.dll" Guid="e592814d-0f72-4991-9e55-50273dd1303d">
+	      <File Id="Microsoft.Threading.Tasks.Extensions.Desktop.dll" Name="Microsoft.Threading.Tasks.Extensions.Desktop.dll" Source="$(var.ROILootManager_TargetDir)Microsoft.Threading.Tasks.Extensions.Desktop.dll" />
+	    </Component>
+	    <Component Win64="yes" Id="Newtonsoft.Json.dll" Guid="140cecbc-9b92-4a9e-b18a-3abbf3b8e381">
+	      <File Id="Newtonsoft.Json.dll" Name="Newtonsoft.Json.dll" Source="$(var.ROILootManager_TargetDir)Newtonsoft.Json.dll" />
+	    </Component>
+	    <Component Win64="yes" Id="SQLite.Designer.dll" Guid="df08b4c4-78ec-4c3e-b0c4-78830c9a7f06">
+	      <File Id="SQLite.Designer.dll" Name="SQLite.Designer.dll" Source="$(var.ROILootManager_TargetDir)SQLite.Designer.dll" />
+	    </Component>
+	    <Component Win64="yes" Id="System.Data.SQLite.dll" Guid="b3f806ee-642a-449e-88b0-20b47108c877">
+	      <File Id="System.Data.SQLite.dll" Name="System.Data.SQLite.dll" Source="$(var.ROILootManager_TargetDir)System.Data.SQLite.dll" />
+	    </Component>
+	    <Component Win64="yes" Id="System.Data.SQLite.EF6.dll" Guid="3743029a-6f78-4d56-bc9c-0f41613a2fce">
+	      <File Id="System.Data.SQLite.EF6.dll" Name="System.Data.SQLite.EF6.dll" Source="$(var.ROILootManager_TargetDir)System.Data.SQLite.EF6.dll" />
+	    </Component>
+	    <Component Win64="yes" Id="System.Net.Http.Extensions.dll" Guid="81f41dab-7fe3-48fe-a956-3f270dcf5cd8">
+	      <File Id="System.Net.Http.Extensions.dll" Name="System.Net.Http.Extensions.dll" Source="$(var.ROILootManager_TargetDir)System.Net.Http.Extensions.dll" />
+	    </Component>
+	    <Component Win64="yes" Id="System.Data.SQLite.Linq.dll" Guid="45c8cec7-46bc-40f4-9303-49648b618390">
+	      <File Id="System.Data.SQLite.Linq.dll" Name="System.Data.SQLite.Linq.dll" Source="$(var.ROILootManager_TargetDir)System.Data.SQLite.Linq.dll" />
+	    </Component>
+	    <Component Win64="yes" Id="System.Security.Cryptography.Algorithms.dll" Guid="5048b983-857d-4c7b-b77b-ca3382f744a9">
+	      <File Id="System.Security.Cryptography.Algorithms.dll" Name="System.Security.Cryptography.Algorithms.dll" Source="$(var.ROILootManager_TargetDir)System.Security.Cryptography.Algorithms.dll" />
+	    </Component>
+	    <Component Win64="yes" Id="System.Net.Http.Primitives.dll" Guid="4642cbb7-b5e0-4956-85da-2097826e2fee">
+	      <File Id="System.Net.Http.Primitives.dll" Name="System.Net.Http.Primitives.dll" Source="$(var.ROILootManager_TargetDir)System.Net.Http.Primitives.dll" />
+	    </Component>
+	    <Component Win64="yes" Id="System.Security.Cryptography.Encoding.dll" Guid="6791c709-b99c-429e-abe3-6da5adcd6392">
+	      <File Id="System.Security.Cryptography.Encoding.dll" Name="System.Security.Cryptography.Encoding.dll" Source="$(var.ROILootManager_TargetDir)System.Security.Cryptography.Encoding.dll" />
+	    </Component>
+	    <Component Win64="yes" Id="System.Security.Cryptography.X509Certificates.dll" Guid="a42cd27e-3046-4242-82fb-9b59c41c76a1">
+	      <File Id="System.Security.Cryptography.X509Certificates.dll" Name="System.Security.Cryptography.X509Certificates.dll" Source="$(var.ROILootManager_TargetDir)System.Security.Cryptography.X509Certificates.dll" />
+	    </Component>
+	    <Component Win64="yes" Id="System.Security.Cryptography.Primitives.dll" Guid="c146b5b9-8b37-4d33-ae9b-ea70308395bd">
+	      <File Id="System.Security.Cryptography.Primitives.dll" Name="System.Security.Cryptography.Primitives.dll" Source="$(var.ROILootManager_TargetDir)System.Security.Cryptography.Primitives.dll" />
+	    </Component>
+	    
+	    
+	    
+	  </ComponentGroup>
+	</Fragment>
+</Wix>

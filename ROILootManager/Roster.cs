@@ -21,6 +21,7 @@ namespace ROILootManager
 
     public Roster()
     {
+
       // Clear the current roster
       rosterArr.Clear();
 

@@ -38,14 +38,25 @@
       this.addMissingItemsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.tabControl1 = new System.Windows.Forms.TabControl();
       this.tabPage1 = new System.Windows.Forms.TabPage();
+      this.groupBox1 = new System.Windows.Forms.GroupBox();
+      this.removeLoot = new System.Windows.Forms.Button();
+      this.lootLogView = new System.Windows.Forms.ListView();
+      this.playerName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+      this.itemName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.grpChatLogs = new System.Windows.Forms.GroupBox();
+      this.findGuildChat = new System.Windows.Forms.TextBox();
+      this.chkGuildLootOnly = new System.Windows.Forms.CheckBox();
+      this.chkTellsScroll = new System.Windows.Forms.CheckBox();
+      this.lblOfficerTells = new System.Windows.Forms.Label();
+      this.txtTells = new System.Windows.Forms.RichTextBox();
       this.chkOfficerScroll = new System.Windows.Forms.CheckBox();
       this.chkGuildScroll = new System.Windows.Forms.CheckBox();
       this.lblOfficerChat = new System.Windows.Forms.Label();
-      this.txtOfficerChat = new System.Windows.Forms.TextBox();
+      this.txtOfficerChat = new System.Windows.Forms.RichTextBox();
       this.lblGuildChat = new System.Windows.Forms.Label();
-      this.txtGuildChat = new System.Windows.Forms.TextBox();
+      this.txtGuildChat = new System.Windows.Forms.RichTextBox();
       this.gbAddNewLoot = new System.Windows.Forms.GroupBox();
+      this.lblStatus = new System.Windows.Forms.Label();
       this.cmbItems = new System.Windows.Forms.ComboBox();
       this.lblSlot = new System.Windows.Forms.Label();
       this.lblItem = new System.Windows.Forms.Label();
@@ -131,6 +142,7 @@
       this.mnuMainMenu.SuspendLayout();
       this.tabControl1.SuspendLayout();
       this.tabPage1.SuspendLayout();
+      this.groupBox1.SuspendLayout();
       this.grpChatLogs.SuspendLayout();
       this.gbAddNewLoot.SuspendLayout();
       this.tabPage2.SuspendLayout();
@@ -219,23 +231,75 @@
       this.tabControl1.Location = new System.Drawing.Point(0, 27);
       this.tabControl1.Name = "tabControl1";
       this.tabControl1.SelectedIndex = 0;
-      this.tabControl1.Size = new System.Drawing.Size(1190, 640);
+      this.tabControl1.Size = new System.Drawing.Size(1190, 766);
       this.tabControl1.TabIndex = 1;
       // 
       // tabPage1
       // 
       this.tabPage1.BackColor = System.Drawing.SystemColors.Control;
+      this.tabPage1.Controls.Add(this.groupBox1);
       this.tabPage1.Controls.Add(this.grpChatLogs);
       this.tabPage1.Controls.Add(this.gbAddNewLoot);
       this.tabPage1.Location = new System.Drawing.Point(4, 25);
       this.tabPage1.Name = "tabPage1";
       this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-      this.tabPage1.Size = new System.Drawing.Size(1182, 611);
+      this.tabPage1.Size = new System.Drawing.Size(1182, 737);
       this.tabPage1.TabIndex = 0;
       this.tabPage1.Text = "Add Loot";
       // 
+      // groupBox1
+      // 
+      this.groupBox1.Controls.Add(this.removeLoot);
+      this.groupBox1.Controls.Add(this.lootLogView);
+      this.groupBox1.Location = new System.Drawing.Point(8, 6);
+      this.groupBox1.Name = "groupBox1";
+      this.groupBox1.Size = new System.Drawing.Size(335, 341);
+      this.groupBox1.TabIndex = 11;
+      this.groupBox1.TabStop = false;
+      this.groupBox1.Text = "Items Looted";
+      // 
+      // removeLoot
+      // 
+      this.removeLoot.Location = new System.Drawing.Point(202, 289);
+      this.removeLoot.Name = "removeLoot";
+      this.removeLoot.Size = new System.Drawing.Size(98, 34);
+      this.removeLoot.TabIndex = 1;
+      this.removeLoot.Text = "Clear";
+      this.removeLoot.UseVisualStyleBackColor = true;
+      this.removeLoot.Click += new System.EventHandler(this.removeLoot_Click);
+      // 
+      // lootLogView
+      // 
+      this.lootLogView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.playerName,
+            this.itemName});
+      this.lootLogView.FullRowSelect = true;
+      this.lootLogView.HideSelection = false;
+      this.lootLogView.Location = new System.Drawing.Point(6, 26);
+      this.lootLogView.MultiSelect = false;
+      this.lootLogView.Name = "lootLogView";
+      this.lootLogView.Size = new System.Drawing.Size(323, 247);
+      this.lootLogView.TabIndex = 0;
+      this.lootLogView.UseCompatibleStateImageBehavior = false;
+      this.lootLogView.View = System.Windows.Forms.View.Details;
+      // 
+      // playerName
+      // 
+      this.playerName.Text = "Player Name";
+      this.playerName.Width = 129;
+      // 
+      // itemName
+      // 
+      this.itemName.Text = "Item";
+      this.itemName.Width = 188;
+      // 
       // grpChatLogs
       // 
+      this.grpChatLogs.Controls.Add(this.findGuildChat);
+      this.grpChatLogs.Controls.Add(this.chkGuildLootOnly);
+      this.grpChatLogs.Controls.Add(this.chkTellsScroll);
+      this.grpChatLogs.Controls.Add(this.lblOfficerTells);
+      this.grpChatLogs.Controls.Add(this.txtTells);
       this.grpChatLogs.Controls.Add(this.chkOfficerScroll);
       this.grpChatLogs.Controls.Add(this.chkGuildScroll);
       this.grpChatLogs.Controls.Add(this.lblOfficerChat);
@@ -244,20 +308,74 @@
       this.grpChatLogs.Controls.Add(this.txtGuildChat);
       this.grpChatLogs.Location = new System.Drawing.Point(349, 6);
       this.grpChatLogs.Name = "grpChatLogs";
-      this.grpChatLogs.Size = new System.Drawing.Size(827, 599);
+      this.grpChatLogs.Size = new System.Drawing.Size(827, 723);
       this.grpChatLogs.TabIndex = 10;
       this.grpChatLogs.TabStop = false;
       this.grpChatLogs.Text = "Chat Logs (No Log Selected)";
+      // 
+      // findGuildChat
+      // 
+      this.findGuildChat.Location = new System.Drawing.Point(678, 17);
+      this.findGuildChat.Name = "findGuildChat";
+      this.findGuildChat.Size = new System.Drawing.Size(138, 23);
+      this.findGuildChat.TabIndex = 17;
+      this.findGuildChat.TextChanged += new System.EventHandler(this.findGuildChat_TextChanged);
+      this.findGuildChat.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.findGuildChat_KeyPress);
+      // 
+      // chkGuildLootOnly
+      // 
+      this.chkGuildLootOnly.AutoSize = true;
+      this.chkGuildLootOnly.Checked = true;
+      this.chkGuildLootOnly.CheckState = System.Windows.Forms.CheckState.Checked;
+      this.chkGuildLootOnly.Enabled = false;
+      this.chkGuildLootOnly.Location = new System.Drawing.Point(234, 23);
+      this.chkGuildLootOnly.Name = "chkGuildLootOnly";
+      this.chkGuildLootOnly.Size = new System.Drawing.Size(159, 21);
+      this.chkGuildLootOnly.TabIndex = 16;
+      this.chkGuildLootOnly.Text = "Show Only Loot Chat";
+      this.chkGuildLootOnly.UseVisualStyleBackColor = true;
+      this.chkGuildLootOnly.CheckedChanged += new System.EventHandler(this.chkGuildLootOnly_CheckedChanged);
+      // 
+      // chkTellsScroll
+      // 
+      this.chkTellsScroll.AutoSize = true;
+      this.chkTellsScroll.Checked = true;
+      this.chkTellsScroll.CheckState = System.Windows.Forms.CheckState.Checked;
+      this.chkTellsScroll.Location = new System.Drawing.Point(101, 490);
+      this.chkTellsScroll.Name = "chkTellsScroll";
+      this.chkTellsScroll.Size = new System.Drawing.Size(133, 21);
+      this.chkTellsScroll.TabIndex = 12;
+      this.chkTellsScroll.Text = "Scroll to bottom?";
+      this.chkTellsScroll.UseVisualStyleBackColor = true;
+      this.chkTellsScroll.CheckedChanged += new System.EventHandler(this.chkTellsScroll_CheckedChanged);
+      // 
+      // lblOfficerTells
+      // 
+      this.lblOfficerTells.AutoSize = true;
+      this.lblOfficerTells.Location = new System.Drawing.Point(6, 491);
+      this.lblOfficerTells.Name = "lblOfficerTells";
+      this.lblOfficerTells.Size = new System.Drawing.Size(76, 17);
+      this.lblOfficerTells.TabIndex = 15;
+      this.lblOfficerTells.Text = "Your Tells:";
+      // 
+      // txtTells
+      // 
+      this.txtTells.Location = new System.Drawing.Point(7, 516);
+      this.txtTells.Name = "txtTells";
+      this.txtTells.ReadOnly = true;
+      this.txtTells.Size = new System.Drawing.Size(812, 200);
+      this.txtTells.TabIndex = 13;
+      this.txtTells.Text = "";
       // 
       // chkOfficerScroll
       // 
       this.chkOfficerScroll.AutoSize = true;
       this.chkOfficerScroll.Checked = true;
       this.chkOfficerScroll.CheckState = System.Windows.Forms.CheckState.Checked;
-      this.chkOfficerScroll.Location = new System.Drawing.Point(99, 325);
+      this.chkOfficerScroll.Location = new System.Drawing.Point(101, 256);
       this.chkOfficerScroll.Name = "chkOfficerScroll";
       this.chkOfficerScroll.Size = new System.Drawing.Size(133, 21);
-      this.chkOfficerScroll.TabIndex = 14;
+      this.chkOfficerScroll.TabIndex = 10;
       this.chkOfficerScroll.Text = "Scroll to bottom?";
       this.chkOfficerScroll.UseVisualStyleBackColor = true;
       this.chkOfficerScroll.CheckedChanged += new System.EventHandler(this.chkOfficerScroll_CheckedChanged);
@@ -267,10 +385,10 @@
       this.chkGuildScroll.AutoSize = true;
       this.chkGuildScroll.Checked = true;
       this.chkGuildScroll.CheckState = System.Windows.Forms.CheckState.Checked;
-      this.chkGuildScroll.Location = new System.Drawing.Point(99, 31);
+      this.chkGuildScroll.Location = new System.Drawing.Point(95, 23);
       this.chkGuildScroll.Name = "chkGuildScroll";
       this.chkGuildScroll.Size = new System.Drawing.Size(133, 21);
-      this.chkGuildScroll.TabIndex = 13;
+      this.chkGuildScroll.TabIndex = 8;
       this.chkGuildScroll.Text = "Scroll to bottom?";
       this.chkGuildScroll.UseVisualStyleBackColor = true;
       this.chkGuildScroll.CheckedChanged += new System.EventHandler(this.chkGuildScroll_CheckedChanged);
@@ -278,26 +396,25 @@
       // lblOfficerChat
       // 
       this.lblOfficerChat.AutoSize = true;
-      this.lblOfficerChat.Location = new System.Drawing.Point(6, 325);
+      this.lblOfficerChat.Location = new System.Drawing.Point(6, 257);
       this.lblOfficerChat.Name = "lblOfficerChat";
       this.lblOfficerChat.Size = new System.Drawing.Size(87, 17);
-      this.lblOfficerChat.TabIndex = 12;
+      this.lblOfficerChat.TabIndex = 10;
       this.lblOfficerChat.Text = "Officer Chat:";
       // 
       // txtOfficerChat
       // 
-      this.txtOfficerChat.Location = new System.Drawing.Point(6, 355);
-      this.txtOfficerChat.Multiline = true;
+      this.txtOfficerChat.Location = new System.Drawing.Point(7, 281);
       this.txtOfficerChat.Name = "txtOfficerChat";
       this.txtOfficerChat.ReadOnly = true;
-      this.txtOfficerChat.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-      this.txtOfficerChat.Size = new System.Drawing.Size(815, 235);
+      this.txtOfficerChat.Size = new System.Drawing.Size(812, 200);
       this.txtOfficerChat.TabIndex = 11;
+      this.txtOfficerChat.Text = "";
       // 
       // lblGuildChat
       // 
       this.lblGuildChat.AutoSize = true;
-      this.lblGuildChat.Location = new System.Drawing.Point(6, 35);
+      this.lblGuildChat.Location = new System.Drawing.Point(6, 24);
       this.lblGuildChat.Name = "lblGuildChat";
       this.lblGuildChat.Size = new System.Drawing.Size(78, 17);
       this.lblGuildChat.TabIndex = 10;
@@ -305,16 +422,16 @@
       // 
       // txtGuildChat
       // 
-      this.txtGuildChat.Location = new System.Drawing.Point(6, 55);
-      this.txtGuildChat.Multiline = true;
+      this.txtGuildChat.Location = new System.Drawing.Point(7, 46);
       this.txtGuildChat.Name = "txtGuildChat";
       this.txtGuildChat.ReadOnly = true;
-      this.txtGuildChat.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-      this.txtGuildChat.Size = new System.Drawing.Size(815, 235);
+      this.txtGuildChat.Size = new System.Drawing.Size(812, 200);
       this.txtGuildChat.TabIndex = 9;
+      this.txtGuildChat.Text = "";
       // 
       // gbAddNewLoot
       // 
+      this.gbAddNewLoot.Controls.Add(this.lblStatus);
       this.gbAddNewLoot.Controls.Add(this.cmbItems);
       this.gbAddNewLoot.Controls.Add(this.lblSlot);
       this.gbAddNewLoot.Controls.Add(this.lblItem);
@@ -328,27 +445,38 @@
       this.gbAddNewLoot.Controls.Add(this.chkRot);
       this.gbAddNewLoot.Controls.Add(this.cmbEvent);
       this.gbAddNewLoot.Controls.Add(this.cmbSlot);
-      this.gbAddNewLoot.Location = new System.Drawing.Point(8, 6);
+      this.gbAddNewLoot.Location = new System.Drawing.Point(8, 353);
       this.gbAddNewLoot.Name = "gbAddNewLoot";
-      this.gbAddNewLoot.Size = new System.Drawing.Size(335, 405);
+      this.gbAddNewLoot.Size = new System.Drawing.Size(335, 376);
       this.gbAddNewLoot.TabIndex = 8;
       this.gbAddNewLoot.TabStop = false;
       this.gbAddNewLoot.Text = "Add New Loot";
       // 
+      // lblStatus
+      // 
+      this.lblStatus.AutoSize = true;
+      this.lblStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.lblStatus.Location = new System.Drawing.Point(185, 348);
+      this.lblStatus.Name = "lblStatus";
+      this.lblStatus.Size = new System.Drawing.Size(0, 13);
+      this.lblStatus.TabIndex = 13;
+      // 
       // cmbItems
       // 
+      this.cmbItems.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+      this.cmbItems.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
       this.cmbItems.FormattingEnabled = true;
-      this.cmbItems.Location = new System.Drawing.Point(100, 215);
+      this.cmbItems.Location = new System.Drawing.Point(100, 208);
       this.cmbItems.Name = "cmbItems";
       this.cmbItems.Size = new System.Drawing.Size(200, 24);
-      this.cmbItems.TabIndex = 13;
+      this.cmbItems.TabIndex = 4;
       this.cmbItems.SelectedValueChanged += new System.EventHandler(this.cmbItems_SelectedValueChanged);
       // 
       // lblSlot
       // 
       this.lblSlot.AutoSize = true;
       this.lblSlot.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.lblSlot.Location = new System.Drawing.Point(49, 170);
+      this.lblSlot.Location = new System.Drawing.Point(49, 163);
       this.lblSlot.Name = "lblSlot";
       this.lblSlot.Size = new System.Drawing.Size(41, 17);
       this.lblSlot.TabIndex = 12;
@@ -358,9 +486,10 @@
       // lblItem
       // 
       this.lblItem.AutoSize = true;
-      this.lblItem.Location = new System.Drawing.Point(56, 215);
+      this.lblItem.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.lblItem.Location = new System.Drawing.Point(56, 208);
       this.lblItem.Name = "lblItem";
-      this.lblItem.Size = new System.Drawing.Size(38, 17);
+      this.lblItem.Size = new System.Drawing.Size(43, 17);
       this.lblItem.TabIndex = 11;
       this.lblItem.Text = "Item:";
       this.lblItem.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -369,7 +498,7 @@
       // 
       this.lblEvent.AutoSize = true;
       this.lblEvent.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.lblEvent.Location = new System.Drawing.Point(39, 125);
+      this.lblEvent.Location = new System.Drawing.Point(39, 118);
       this.lblEvent.Name = "lblEvent";
       this.lblEvent.Size = new System.Drawing.Size(54, 17);
       this.lblEvent.TabIndex = 10;
@@ -380,7 +509,7 @@
       // 
       this.lblName.AutoSize = true;
       this.lblName.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.lblName.Location = new System.Drawing.Point(39, 80);
+      this.lblName.Location = new System.Drawing.Point(39, 73);
       this.lblName.Name = "lblName";
       this.lblName.Size = new System.Drawing.Size(54, 17);
       this.lblName.TabIndex = 9;
@@ -391,7 +520,7 @@
       // 
       this.lblDate.AutoSize = true;
       this.lblDate.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.lblDate.Location = new System.Drawing.Point(10, 35);
+      this.lblDate.Location = new System.Drawing.Point(10, 32);
       this.lblDate.Name = "lblDate";
       this.lblDate.Size = new System.Drawing.Size(85, 17);
       this.lblDate.TabIndex = 8;
@@ -400,7 +529,7 @@
       // 
       // btnAddLoot
       // 
-      this.btnAddLoot.Location = new System.Drawing.Point(100, 350);
+      this.btnAddLoot.Location = new System.Drawing.Point(100, 286);
       this.btnAddLoot.Name = "btnAddLoot";
       this.btnAddLoot.Size = new System.Drawing.Size(200, 40);
       this.btnAddLoot.TabIndex = 7;
@@ -411,7 +540,7 @@
       // dteRaidDate
       // 
       this.dteRaidDate.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-      this.dteRaidDate.Location = new System.Drawing.Point(100, 35);
+      this.dteRaidDate.Location = new System.Drawing.Point(100, 32);
       this.dteRaidDate.Name = "dteRaidDate";
       this.dteRaidDate.Size = new System.Drawing.Size(200, 23);
       this.dteRaidDate.TabIndex = 0;
@@ -420,7 +549,7 @@
       // chkAlt
       // 
       this.chkAlt.AutoSize = true;
-      this.chkAlt.Location = new System.Drawing.Point(100, 305);
+      this.chkAlt.Location = new System.Drawing.Point(217, 249);
       this.chkAlt.Name = "chkAlt";
       this.chkAlt.Size = new System.Drawing.Size(83, 21);
       this.chkAlt.TabIndex = 6;
@@ -430,8 +559,10 @@
       // 
       // cmbName
       // 
+      this.cmbName.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+      this.cmbName.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
       this.cmbName.FormattingEnabled = true;
-      this.cmbName.Location = new System.Drawing.Point(100, 80);
+      this.cmbName.Location = new System.Drawing.Point(100, 73);
       this.cmbName.Name = "cmbName";
       this.cmbName.Size = new System.Drawing.Size(200, 24);
       this.cmbName.TabIndex = 1;
@@ -439,7 +570,7 @@
       // chkRot
       // 
       this.chkRot.AutoSize = true;
-      this.chkRot.Location = new System.Drawing.Point(100, 260);
+      this.chkRot.Location = new System.Drawing.Point(100, 249);
       this.chkRot.Name = "chkRot";
       this.chkRot.Size = new System.Drawing.Size(89, 21);
       this.chkRot.TabIndex = 5;
@@ -448,8 +579,10 @@
       // 
       // cmbEvent
       // 
+      this.cmbEvent.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+      this.cmbEvent.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
       this.cmbEvent.FormattingEnabled = true;
-      this.cmbEvent.Location = new System.Drawing.Point(100, 125);
+      this.cmbEvent.Location = new System.Drawing.Point(100, 118);
       this.cmbEvent.Name = "cmbEvent";
       this.cmbEvent.Size = new System.Drawing.Size(200, 24);
       this.cmbEvent.TabIndex = 2;
@@ -459,7 +592,7 @@
       // 
       this.cmbSlot.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
       this.cmbSlot.FormattingEnabled = true;
-      this.cmbSlot.Location = new System.Drawing.Point(100, 170);
+      this.cmbSlot.Location = new System.Drawing.Point(100, 163);
       this.cmbSlot.Name = "cmbSlot";
       this.cmbSlot.Size = new System.Drawing.Size(200, 24);
       this.cmbSlot.TabIndex = 3;
@@ -480,7 +613,7 @@
       this.tabPage2.Location = new System.Drawing.Point(4, 25);
       this.tabPage2.Name = "tabPage2";
       this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-      this.tabPage2.Size = new System.Drawing.Size(1182, 611);
+      this.tabPage2.Size = new System.Drawing.Size(1182, 737);
       this.tabPage2.TabIndex = 1;
       this.tabPage2.Text = "View Loot";
       // 
@@ -675,7 +808,7 @@
       this.tabPage3.Controls.Add(this.dgvVisibleSummary);
       this.tabPage3.Location = new System.Drawing.Point(4, 25);
       this.tabPage3.Name = "tabPage3";
-      this.tabPage3.Size = new System.Drawing.Size(1182, 611);
+      this.tabPage3.Size = new System.Drawing.Size(1182, 737);
       this.tabPage3.TabIndex = 0;
       this.tabPage3.Text = "Visible Summary";
       // 
@@ -779,7 +912,7 @@
       this.tabPage4.Location = new System.Drawing.Point(4, 25);
       this.tabPage4.Name = "tabPage4";
       this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
-      this.tabPage4.Size = new System.Drawing.Size(1182, 611);
+      this.tabPage4.Size = new System.Drawing.Size(1182, 737);
       this.tabPage4.TabIndex = 2;
       this.tabPage4.Text = "Non-Visible Summary";
       // 
@@ -907,7 +1040,7 @@
       this.tabPage5.Location = new System.Drawing.Point(4, 25);
       this.tabPage5.Name = "tabPage5";
       this.tabPage5.Padding = new System.Windows.Forms.Padding(3);
-      this.tabPage5.Size = new System.Drawing.Size(1182, 611);
+      this.tabPage5.Size = new System.Drawing.Size(1182, 737);
       this.tabPage5.TabIndex = 3;
       this.tabPage5.Text = "Weapon Summary";
       // 
@@ -1056,13 +1189,13 @@
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(1184, 661);
+      this.ClientSize = new System.Drawing.Size(1184, 791);
       this.Controls.Add(this.tabControl1);
       this.Controls.Add(this.mnuMainMenu);
       this.MainMenuStrip = this.mnuMainMenu;
       this.MaximizeBox = false;
-      this.MaximumSize = new System.Drawing.Size(1200, 700);
-      this.MinimumSize = new System.Drawing.Size(1200, 700);
+      this.MaximumSize = new System.Drawing.Size(1200, 830);
+      this.MinimumSize = new System.Drawing.Size(1200, 830);
       this.Name = "frmMain";
       this.Text = "ROI Loot Manager - v0.2";
       this.Resize += new System.EventHandler(this.frmMain_Resize);
@@ -1070,6 +1203,7 @@
       this.mnuMainMenu.PerformLayout();
       this.tabControl1.ResumeLayout(false);
       this.tabPage1.ResumeLayout(false);
+      this.groupBox1.ResumeLayout(false);
       this.grpChatLogs.ResumeLayout(false);
       this.grpChatLogs.PerformLayout();
       this.gbAddNewLoot.ResumeLayout(false);
@@ -1110,12 +1244,15 @@
     private System.Windows.Forms.ComboBox cmbSlot;
     private System.Windows.Forms.GroupBox grpChatLogs;
     private System.Windows.Forms.Label lblGuildChat;
-    private System.Windows.Forms.TextBox txtGuildChat;
+    private System.Windows.Forms.RichTextBox txtGuildChat;
     private System.Windows.Forms.Label lblOfficerChat;
-    private System.Windows.Forms.TextBox txtOfficerChat;
+    private System.Windows.Forms.RichTextBox txtOfficerChat;
+    private System.Windows.Forms.Label lblOfficerTells;
+    private System.Windows.Forms.RichTextBox txtTells;
     private System.Windows.Forms.ToolStripMenuItem selectLogFileToolStripMenuItem;
     private System.Windows.Forms.CheckBox chkOfficerScroll;
     private System.Windows.Forms.CheckBox chkGuildScroll;
+    private System.Windows.Forms.CheckBox chkTellsScroll;
     private System.Windows.Forms.ComboBox cmbItems;
     private System.Windows.Forms.ToolStripMenuItem actionsToolStripMenuItem;
     private System.Windows.Forms.TabPage tabPage2;
@@ -1190,6 +1327,14 @@
     private System.Windows.Forms.DataGridViewTextBoxColumn clmLootSummaryAlt;
     private System.Windows.Forms.DataGridViewTextBoxColumn clmLootSummaryAltLastLootDate;
     private System.Windows.Forms.DataGridViewTextBoxColumn clmLootSummaryLastLootDate;
+    private System.Windows.Forms.GroupBox groupBox1;
+    private System.Windows.Forms.ListView lootLogView;
+    private System.Windows.Forms.ColumnHeader playerName;
+    private System.Windows.Forms.ColumnHeader itemName;
+    private System.Windows.Forms.Label lblStatus;
+    private System.Windows.Forms.Button removeLoot;
+    private System.Windows.Forms.CheckBox chkGuildLootOnly;
+    private System.Windows.Forms.TextBox findGuildChat;
   }
 }
 

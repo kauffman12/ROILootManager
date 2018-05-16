@@ -13,6 +13,7 @@ namespace ROILootManager
     public static DBManager singleton;
 
     private const string DB_CONNECTION_STRING = "Data Source=lootDB.db3;Versio=3;";
+    private const string SLOT_QUERY = "SELECT DISTINCT slot FROM items WHERE item = '{0}';";
 
     private SQLiteConnection conn;
 
@@ -298,6 +299,20 @@ namespace ROILootManager
     {
       SQLiteCommand command = new SQLiteCommand(sql, conn);
       return command.ExecuteReader();
+    }
+
+    public string getSlotForItem(string item)
+    {
+      string slot = null;
+      string sql = String.Format(SLOT_QUERY, DBManager.safeParam(item));
+
+      DbDataReader reader = executeQuery(sql);
+      if (reader.Read())
+      {
+        slot = reader[0].ToString();
+      }
+
+      return slot;
     }
 
     public void Dispose()

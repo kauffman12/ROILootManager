@@ -1,12 +1,14 @@
-﻿using System;
+﻿using log4net;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.Common;
 using System.Drawing;
 using System.Text;
-using System.Windows.Forms;
-using log4net;
+using System.Text.RegularExpressions;
 using System.Threading;
+using System.Timers;
+using System.Windows.Forms;
 
 namespace ROILootManager
 {
@@ -22,13 +24,19 @@ namespace ROILootManager
     private frmLootLog lootLogForm = new frmLootLog();
     private Thread logRefresher;
     private bool includeRots = false;
+    private int findStart = 0;
+    private string lastSearch;
+    System.Timers.Timer timer = new System.Timers.Timer();
+
+    private Regex guildLootChat = new Regex(@"\[.+\] \w+ (tells the guild|say to your guild), '/t");
+    private List<string> guildChatBuffer = new List<string>();
 
     public frmMain()
     {
       InitializeComponent();
       Refresh();
       logger.Info("Main form initialized.");
-
+      
       try
       {
         roster = new Roster();
@@ -53,6 +61,20 @@ namespace ROILootManager
 
         this.Text = "ROI Loot Manager - v" + Constants.PROGRAM_VERSION;
 
+        Form mainFrm = this;        
+        timer.Elapsed += new System.Timers.ElapsedEventHandler(
+          (object timerSender, ElapsedEventArgs timerEvent) =>
+          {
+            mainFrm.Invoke(new MethodInvoker(delegate ()
+            {
+              lblStatus.Text = "";
+              timer.Enabled = false;
+            }));
+          }
+        );
+
+        timer.Interval = 2000;
+        timer.Enabled = false;
       }
       catch (Exception e)
       {
@@ -78,8 +100,6 @@ namespace ROILootManager
       cmbSlot.SelectedIndex = -1;
 
       dteRaidDate.Value = DateTime.Today;
-
-      gbAddNewLoot.Text = "Add New Loot (ROF)";
 
       loadRosterNames();
 
@@ -117,7 +137,7 @@ namespace ROILootManager
       dgvWeaponSummary.SortCompare += new DataGridViewSortCompareEventHandler(lootSummarySorter);
       lvRosterNames.ItemChecked += new ItemCheckedEventHandler(lvRosterNames_ItemChecked);
       lvTierSelection.ItemChecked += new ItemCheckedEventHandler(lvTierSelection_ItemChecked);
-
+      lootLogView.ItemSelectionChanged += new ListViewItemSelectionChangedEventHandler(selectLoot);
     }
 
     private void updateLootLog()
@@ -128,6 +148,56 @@ namespace ROILootManager
         //getLootSummary();
         Thread.Sleep(1800000);
         //Thread.Sleep(20000);
+      }
+    }
+
+    private void selectLoot(object sender, ListViewItemSelectionChangedEventArgs args)
+    {
+      if (lootLogView.SelectedItems.Count > 0)
+      {
+        //reset
+        removeLoot.Enabled = true;
+        cmbName.SelectedIndex = -1;
+        cmbName.Text = "";
+        cmbSlot.SelectedIndex = -1;
+        cmbSlot.Text = "";
+        cmbItems.SelectedIndex = -1;
+        cmbItems.Text = "";
+
+        int nameIndex = cmbName.FindString(lootLogView.SelectedItems[0].SubItems[0].Text);
+        if (nameIndex >= 0)
+        {
+          cmbName.SelectedIndex = nameIndex;
+        }
+        else
+        {
+          // must be a new member
+          cmbName.Text = lootLogView.SelectedItems[0].SubItems[0].Text;
+        }
+
+        // set slot before item
+        string slot = DBManager.getManager().getSlotForItem(lootLogView.SelectedItems[0].SubItems[1].Text);
+        int slotIndex = -1;
+
+        if (slot != null && (slotIndex = cmbSlot.FindString(slot)) >= 0)
+        {
+          cmbSlot.SelectedIndex = slotIndex;
+        }
+
+        int itemIndex = cmbItems.FindString(lootLogView.SelectedItems[0].SubItems[1].Text);
+        if (itemIndex >= 0)
+        {
+          cmbItems.SelectedIndex = itemIndex;
+        }
+        else
+        {
+          // must be a new item
+          cmbItems.Text = lootLogView.SelectedItems[0].SubItems[1].Text;
+        }
+      }
+      else
+      {
+        removeLoot.Enabled = false;
       }
     }
 
@@ -459,20 +529,24 @@ namespace ROILootManager
     private void logReaderEvent(object sender, LogEventArgs e)
     {
       logger.Debug("logReaderEvent " + e.line);
-      TextBox textBox = null;
+      RichTextBox textBox = null;
       CheckBox checkBox = null;
 
-      if (e.type.Equals(LogReader.logTypes.OFFICER_CHAT))
+      switch(e.type)
       {
-        textBox = txtOfficerChat;
-        checkBox = chkOfficerScroll;
+        case LogReader.logTypes.OFFICER_CHAT:
+          textBox = txtOfficerChat;
+          checkBox = chkOfficerScroll;
+          break;
+        case LogReader.logTypes.GUILD_CHAT:
+          textBox = txtGuildChat;
+          checkBox = chkGuildScroll;
+          break;
+        case LogReader.logTypes.TELLS:
+          textBox = txtTells;
+          checkBox = chkTellsScroll;
+          break;
       }
-      else if (e.type.Equals(LogReader.logTypes.GUILD_CHAT))
-      {
-        textBox = txtGuildChat;
-        checkBox = chkGuildScroll;
-      }
-
 
       // InvokeRequired required compares the thread ID of the
       // calling thread to the thread ID of the creating thread.
@@ -491,22 +565,90 @@ namespace ROILootManager
           // Save the starting positions of the current cursor and selected text
           int start = textBox.SelectionStart;
           int len = textBox.SelectionLength;
+          textBox.SelectionColor = Color.Black;
 
-          //textBox.Text = newText;
-          textBox.AppendText(Environment.NewLine + e.line);
+          // remove initial timestamp
+          int firstChat = e.line.IndexOf(']') + 2;
+          string theLine = e.line.Substring(firstChat, e.line.Length - firstChat);
 
-          if (checkBox.Checked)
+          if (textBox == txtGuildChat)
           {
-            textBox.SelectionStart = textBox.Text.Length;
+            bool isLootChat = guildLootChat.IsMatch(e.line) || (e.line.Split(new string[] { " // " }, StringSplitOptions.None).Length > 1);
 
+            if (!isLootChat)
+            {
+              if (chkGuildLootOnly.Checked)
+              {
+                guildChatBuffer.Add(theLine);
+              }
+              else
+              {
+                if (textBox.Lines.Length > 0)
+                {
+                  textBox.AppendText(Environment.NewLine);
+                }
+
+                textBox.AppendText(theLine);
+              }
+            }
+            else
+            {
+              guildChatBuffer.Add(theLine);
+
+              if (textBox.Lines.Length > 0)
+              {
+                textBox.AppendText(Environment.NewLine);
+              }
+
+              textBox.AppendText(theLine);
+            }
+
+            if (checkBox.Checked)
+            {
+              textBox.SelectionStart = textBox.Text.Length;
+            }
+            else
+            {
+              textBox.SelectionStart = start;
+              textBox.SelectionLength = len;
+            }
           }
           else
           {
-            textBox.SelectionStart = start;
-            textBox.SelectionLength = len;
+            if (textBox.Lines.Length > 0)
+            {
+              textBox.AppendText(Environment.NewLine);
+            }
+
+            textBox.AppendText(theLine);
           }
 
           textBox.ScrollToCaret();
+        }
+      }
+      else if (e.type == LogReader.logTypes.LOOT)
+      {
+        // Group 0 is everything       Group 1     Group 2     Group 3
+        //[Sun May 13 20:20:29 2018] --(You) have (looted) a (Enchanted Runestone).--
+        if (e.matches[0].Groups.Count == 4)
+        {
+          string userName = e.matches[0].Groups[1].Value;
+          if ("You".Equals(userName))
+          {
+            userName = PropertyManager.getManager().getProperty("UserName");
+            if (userName == null)
+            {
+              userName = "Unknown";
+            }
+          }
+
+          string[] row = { userName, e.matches[0].Groups[3].Value };
+
+          this.Invoke(new MethodInvoker(delegate()
+          {
+            lootLogView.Items.Add(new ListViewItem(row));
+          }
+          ));
         }
       }
 
@@ -531,10 +673,18 @@ namespace ROILootManager
 
         List<ItemEntry> items = itemListing.getFilteredList(eventName, slot, tier);
 
+        string previous = cmbItems.SelectedText;
         cmbItems.DataSource = items;
         cmbItems.DisplayMember = "itemName";
         cmbItems.ValueMember = "itemName";
-        if (items.Count == 1)
+
+        int previousIndex = cmbItems.FindString(previous);
+
+        if (previousIndex >= 0)
+        {
+          cmbItems.SelectedIndex = previousIndex;
+        }
+        else if (items.Count == 1)
         {
           cmbItems.SelectedIndex = 0;
         }
@@ -659,7 +809,12 @@ namespace ROILootManager
           cmbEvent_SelectedValueChanged(sender, e);
           chkAlt.Checked = false;
 
-          MessageBox.Show("Loot added successfully.");
+          lblStatus.Text = "Loot added successfully.";
+
+          if (!timer.Enabled)
+          {
+            timer.Enabled = true; // timer for clearing status
+          }
         }
         catch (Exception ex)
         {
@@ -725,6 +880,17 @@ namespace ROILootManager
       {
         txtOfficerChat.SelectionStart = txtOfficerChat.Text.Length;
         txtOfficerChat.ScrollToCaret();
+      }
+    }
+
+    private void chkTellsScroll_CheckedChanged(object sender, EventArgs e)
+    {
+      {
+        if (chkTellsScroll.Checked)
+        {
+          txtTells.SelectionStart = txtTells.Text.Length;
+          txtTells.ScrollToCaret();
+        }
       }
     }
 
@@ -937,6 +1103,91 @@ namespace ROILootManager
       includeRots = isChecked;
 
       getLootSummary();
+    }
+
+    private void removeLoot_Click(object sender, EventArgs e)
+    {
+      lootLogView.Items.Clear();
+    }
+
+    private void chkGuildLootOnly_CheckedChanged(object sender, EventArgs e)
+    {
+      string[] temp = txtGuildChat.Lines;
+      txtGuildChat.Lines = guildChatBuffer.ToArray();
+      guildChatBuffer = new List<string>(temp);
+
+      if (chkGuildScroll.Enabled)
+      {
+        int theStart = txtGuildChat.Text.Length - 1;
+        txtGuildChat.SelectionStart = (theStart >= 0) ? theStart : 0;
+        txtGuildChat.SelectionLength = 0;
+        txtGuildChat.ScrollToCaret();
+      }
+    }
+
+    private void findGuildChat_TextChanged(object sender, EventArgs e)
+    {
+      if (findGuildChat.Text.Length > 0)
+      {
+        string search = findGuildChat.Text.Trim();
+        if (!search.Equals(""))
+        {
+          if (!search.Equals(lastSearch))
+          {
+            findStart = 0;
+            lastSearch = search;
+          }
+
+          findStart = txtGuildChat.Find(search, findStart, -1, RichTextBoxFinds.None);
+          if (findStart >= 0)
+          {
+            // reset before selecting next
+            txtGuildChat.Select(0, txtGuildChat.Text.Length - 1);
+            txtGuildChat.SelectionColor = Color.Black;
+
+            txtGuildChat.DeselectAll();
+            txtGuildChat.Select(findStart, search.Length);
+            txtGuildChat.SelectionColor = Color.Red;
+            txtGuildChat.ScrollToCaret();
+            findStart = findStart + search.Length;
+
+            if (e.GetType() == typeof(KeyPressEventArgs))
+            {
+              ((KeyPressEventArgs) e).Handled = true;
+            }
+          }
+          else
+          {
+            findStart = 0;
+          }
+        }
+      }
+      else
+      {
+        // reset before selecting next
+        if (txtGuildChat.Text.Length > 0)
+        {
+          txtGuildChat.SelectionColor = Color.Black;
+          txtGuildChat.SelectionStart = 0;
+          txtGuildChat.SelectionLength = txtGuildChat.Text.Length - 1;
+          txtGuildChat.SelectionLength = 0;
+        }
+
+        if (chkGuildScroll.Enabled)
+        {
+          txtGuildChat.SelectionStart = txtGuildChat.Text.Length - 1;
+          txtGuildChat.SelectionLength = 0;
+          txtGuildChat.ScrollToCaret();
+        }
+      }
+    }
+
+    private void findGuildChat_KeyPress(object sender, KeyPressEventArgs e)
+    {
+      if (e.KeyChar.Equals('\r'))
+      {
+        findGuildChat_TextChanged(sender, e);
+      }
     }
   }
 }

@@ -19,10 +19,12 @@ namespace ROILootManager
     private Thread myThread;
     private ThreadState threadState;
 
-    public enum logTypes { GUILD_CHAT, OFFICER_CHAT };
-    private Regex guildChat = new Regex("(tells the guild|say to your guild)");
-    private Regex officerChat = new Regex("(?i)officersofroi(?-i):");
-    //private Regex officerChat = new Regex("guildundertow:");
+    public enum logTypes { GUILD_CHAT, OFFICER_CHAT, TELLS, LOOT };
+    private Regex guildChat = new Regex(@"\[.+\] \w+ (tells the guild|say to your guild)");
+    private Regex officerChat = new Regex(@"\[.+\] \w+ tell?(\w) (?i)officersofroi(?-i):");
+    private Regex tells = new Regex(@"\[.+\] \w+ tells you, '");
+    private Regex lootedItem = new Regex(@"\[.+\] --(\w+) (has|have) looted a (.+)\.--");
+    private Regex userFromFileName = new Regex(@"eqlog_(\w+)_");
 
     public event LogReaderEvent logEvent;
     public LogReader()
@@ -36,7 +38,14 @@ namespace ROILootManager
         logFilePath = file.Substring(0, file.LastIndexOf("\\")) + "\\";
         logFileName = file.Substring(file.LastIndexOf("\\") + 1);
         PropertyManager.getManager().setProperty("EQlogFile", file);
-        logger.Info("New log file set " + file);
+
+        // parse current user name
+        MatchCollection matches = userFromFileName.Matches(logFileName);
+        if (matches.Count > 0)
+        {
+          PropertyManager.getManager().setProperty("UserName", matches[0].Groups[1].Value);
+        }
+
         return true;
       }
 
@@ -99,16 +108,21 @@ namespace ROILootManager
                   string line = reader.ReadLine();
                   if (logEvent != null && line.Length > 0)
                   {
-
-                    if (officerChat.IsMatch(line))
+                    MatchCollection matches;
+                    if ((matches = officerChat.Matches(line)).Count > 0)
                     {
-                      logger.Debug("Adding new Officer chat " + line);
-                      logEvent(this, new LogEventArgs(line, LogReader.logTypes.OFFICER_CHAT));
+                      logEvent(this, new LogEventArgs(line, matches, LogReader.logTypes.OFFICER_CHAT));
                     }
-                    else if (guildChat.IsMatch(line))
+                    else if ((matches = guildChat.Matches(line)).Count > 0)
                     {
-                      logger.Debug("Adding new Guild Chat " + line);
-                      logEvent(this, new LogEventArgs(line, LogReader.logTypes.GUILD_CHAT));
+                      logEvent(this, new LogEventArgs(line, matches, LogReader.logTypes.GUILD_CHAT));
+                    }
+                    else if ((matches = tells.Matches(line)).Count > 0)
+                    {
+                      logEvent(this, new LogEventArgs(line, matches, LogReader.logTypes.TELLS));
+                    } else if ((matches = lootedItem.Matches(line)).Count > 0)
+                    {
+                      logEvent(this, new LogEventArgs(line, matches, LogReader.logTypes.LOOT));
                     }
                   }
                 }
@@ -154,10 +168,12 @@ namespace ROILootManager
   public class LogEventArgs : EventArgs
   {
     public string line { get; set; }
+    public MatchCollection matches { get; set; }
     public LogReader.logTypes type { get; set; }
-    public LogEventArgs(string line, LogReader.logTypes type)
+    public LogEventArgs(string line, MatchCollection matches, LogReader.logTypes type)
     {
       this.line = line;
+      this.matches = matches;
       this.type = type;
     }
   }
