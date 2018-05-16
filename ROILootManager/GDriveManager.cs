@@ -118,7 +118,7 @@ namespace ROILootManager
       const string code_challenge_method = "S256";
 
       // Creates a redirect URI using an available port on the loopback address.
-      string redirectURI = string.Format("http://{0}:{1}/", IPAddress.Loopback, 4567);
+      string redirectURI = string.Format("http://{0}:{1}/", IPAddress.Loopback, GetRandomUnusedPort());
 
       // Creates the OAuth 2.0 authorization request.
       string authorizationRequest = string.Format("{0}?response_type=code&scope={1}&redirect_uri={2}&client_id={3}&state={4}&code_challenge={5}&code_challenge_method={6}",
@@ -253,8 +253,6 @@ namespace ROILootManager
       return result;
     }
 
-    // Not currently using because of permissions
-    // Hopefully they can just run netsh http add urlacl url="http://+:4567/" user=everyone
     private static int GetRandomUnusedPort()
     {
       var listener = new TcpListener(IPAddress.Loopback, 0);

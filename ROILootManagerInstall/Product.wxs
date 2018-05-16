@@ -9,6 +9,7 @@
 		<Feature Id="ProductFeature" Title="ROILootManager" Level="1">
 			<ComponentGroupRef Id="ProductComponents" />
       <ComponentRef Id="ApplicationShortcut" />
+      <ComponentRef Id="ApplicationShortcutDesktop" />
     </Feature>
 
     <Icon Id="roiIcon" SourceFile="$(var.ROILootManager.ProjectDir)\roi_icon.ico" />
@@ -26,12 +27,13 @@
 
 	<Fragment>
 		<Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="DesktopFolder" Name="Desktop"/>
 			<Directory Id="ProgramFiles64Folder">
 				<Directory Id="INSTALLFOLDER" Name="ROILootManager" />
 			</Directory>
       <Directory Id="ProgramMenuFolder">
         <Directory Id="ApplicationProgramsFolder" Name="ROI Loot Manager"/>
-      </Directory>      
+      </Directory>
 		</Directory>
     <DirectoryRef Id="ApplicationProgramsFolder">
       <Component Id="ApplicationShortcut" Guid="94171F2F-378E-4C32-A362-DA85029578DD">
@@ -41,10 +43,21 @@
                   Target="[INSTALLFOLDER]\ROILootManager.exe"
                   WorkingDirectory="INSTALLFOLDER"/>
         <RemoveFolder Id="CleanUpShortCut" Directory="ApplicationProgramsFolder" On="uninstall"/>
-        <RegistryValue Root="HKCU" Key="Software\Microsoft\MyApplicationName" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+        <RegistryValue Root="HKCU" Key="Software\ROI\ROILootManager" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
       </Component>
-    </DirectoryRef>    
-	</Fragment>
+    </DirectoryRef>
+    <DirectoryRef Id="DesktopFolder">
+      <Component Id="ApplicationShortcutDesktop" Guid="8907854C-47BD-482D-95F5-B96A70C8927C">
+        <Shortcut Id="ApplicationDesktopShortcut"
+                  Name="ROI Loot Manager"
+                  Description="The ROI Loot Manager"
+                  Target="[INSTALLFOLDER]\ROILootManager.exe"
+                  WorkingDirectory="INSTALLFOLDER"/>
+        <RemoveFolder Id="CleanUpDesktopShortCut" Directory="DesktopFolder" On="uninstall"/>
+        <RegistryValue Root="HKCU" Key="Software\ROI\ROILootManager" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+      </Component>
+    </DirectoryRef>
+  </Fragment>
   
 	<Fragment>
 	  <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
